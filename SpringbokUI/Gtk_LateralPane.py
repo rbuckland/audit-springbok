@@ -1,14 +1,15 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-pygtk.require("2.0")
-import gtk
-import Gtk_NoteBook
-import Gtk_ListView
-import Gtk_TreeView
-import Gtk_Main
-import Gtk_HelpMessage
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+
+from . import Gtk_NoteBook
+from . import Gtk_ListView
+from . import Gtk_TreeView
+from . import Gtk_Main
+from . import Gtk_HelpMessage
 from NetworkGraph import NetworkGraph
 
 
@@ -45,7 +46,7 @@ class Gtk_LateralPane():
         self.notebook_details.add_tab(self.firewalls.scrolled_window, "Firewall List", True)
         self.notebook_details.add_tab(self.details.scrolled_window, "Details", True)
         # Button details #
-        self.button_details = gtk.Button('\n'.join("Details"))
+        self.button_details = Gtk.Button('\n'.join("Details"))
         self.button_details.connect("clicked", self.on_click_details)
         self.button_details.set_size_request(22, 150)
         # help message #
@@ -75,7 +76,7 @@ class Gtk_LateralPane():
 
 
         # Button Routes
-        self.button_routes = gtk.Button('\n'.join('Routes'))
+        self.button_routes = Gtk.Button('\n'.join('Routes'))
         self.button_routes.connect('clicked', self.on_clicked_routes)
         self.button_routes.set_size_request(22, 150)
 
@@ -86,26 +87,26 @@ class Gtk_LateralPane():
         self.notebook_path.add_tab(self.path_route.scrolled_window, "Routed Paths", True)
 
         # Button Path #
-        self.button_path = gtk.Button('\n'.join("Path"))
+        self.button_path = Gtk.Button('\n'.join("Path"))
         self.button_path.connect("clicked", self.on_click_path)
         self.button_path.set_size_request(22, 150)
 
         # VBox #
-        self.vbox = gtk.VBox()
-        self.vbox.pack_start(self.button_details, False, False)
-        self.vbox.pack_start(self.button_path, False, False)
-        self.vbox.pack_start(self.button_routes, False, False)
+        self.vbox = Gtk.VBox()
+        self.vbox.pack_start(self.button_details, False, False, padding=0)
+        self.vbox.pack_start(self.button_path, False, False, padding=0)
+        self.vbox.pack_start(self.button_routes, False, False, padding=0)
 
         # HPaned #
-        self.vpane = gtk.VPaned()
+        self.vpane = Gtk.VPaned()
         self.vpane.pack1(self.notebook_details.notebook, True, False)
         self.vpane.pack2(self.help_message.eb, True, False)
         self.vpane.set_position(4 * Gtk_Main.Gtk_Main().window.get_size()[0] / 5)
 
         # HBox #
-        self.hbox = gtk.HBox()
-        self.hbox.pack_start(self.vpane, True, True)
-        self.hbox.pack_start(self.vbox, False, False)
+        self.hbox = Gtk.HBox()
+        self.hbox.pack_start(self.vpane, True, True, padding=0)
+        self.hbox.pack_start(self.vbox, False, False, padding=0)
 
     def rename_routes_tab(self, new_name):
 
@@ -198,7 +199,7 @@ class Gtk_LateralPane():
 
         firewalls = NetworkGraph.NetworkGraph().firewalls
 
-        for i in xrange(len(firewalls)):
+        for i in range(len(firewalls)):
             if i == index:
                 nb_rules = firewalls[index].get_nb_rules()
                 self.firewalls.model[i][0] = "{0:s}\n{1:s}\nnumber of rules : {2:d}".format(firewalls[i].hostname,

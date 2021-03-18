@@ -1,27 +1,30 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-pygtk.require("2.0")
-import gtk
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+from gi.repository import Gdk
+
+from functools import reduce
 import ntpath
 import time
-import cPickle as pickle
+import pickle as pickle
 from Parser import Parser
 from NetworkGraph import NetworkGraph
 from SpringBase.ACL import ACL
 from AnomalyDetection.InternalDetection import InternalDetection
-import Gtk_Main
-from Gtk_DialogBox import Gtk_DialogBox
-from Gtk_HelpMessage import Gtk_Message
-import Gtk_QueryPath
+from . import Gtk_Main
+from .Gtk_DialogBox import Gtk_DialogBox
+from .Gtk_HelpMessage import Gtk_Message
+from . import Gtk_QueryPath
 from AnomalyDetection.DistributedDetection import DistributedDetection
 from SpringBase.Firewall import Firewall
 from SpringBase.Ip import Ip
 from SpringBase.Route_info import Route_info
 from Parser.MatrixFlowParser.MatrixFlowParser import MatrixFlowParser
 from Parser.QueryPathParser.QueryPathParser import QueryPathParser
-import Gtk_FwSelect
+from . import Gtk_FwSelect
 from socket import *
 from socket import inet_ntoa
 from struct import pack
@@ -56,102 +59,102 @@ class Gtk_MenuBar:
         self.filenames = []
 
         # File #
-        self.submenu_file = gtk.Menu()
+        self.submenu_file = Gtk.Menu()
 
         # Import #
-        self.menu_import = gtk.MenuItem("Import configuration")
+        self.menu_import = Gtk.MenuItem("Import configuration")
         self.submenu_file.append(self.menu_import)
         self.menu_import.connect("activate", lambda x: self.menu_file_import())
 
         # Open project #
-        self.menu_open = gtk.MenuItem("Open project")
+        self.menu_open = Gtk.MenuItem("Open project")
         self.submenu_file.append(self.menu_open)
         self.menu_open.connect("activate", self.on_open_project)
 
         # Save project #
-        self.menu_save = gtk.MenuItem("Save project")
+        self.menu_save = Gtk.MenuItem("Save project")
         self.submenu_file.append(self.menu_save)
         self.menu_save.connect("activate", self.on_save_project)
 
         # Extract rules to excel #
-        self.menu_extract_excel = gtk.MenuItem("Extract rules to excel")
+        self.menu_extract_excel = Gtk.MenuItem("Extract rules to excel")
         self.submenu_file.append(self.menu_extract_excel)
         self.menu_extract_excel.connect("activate", self.on_extract_excel)
 
         # Generate Matrix Table #
-        self.menu_matrix_table = gtk.MenuItem("Generate Matrix Table")
+        self.menu_matrix_table = Gtk.MenuItem("Generate Matrix Table")
         self.submenu_file.append(self.menu_matrix_table)
         self.menu_matrix_table.connect("activate", self.on_generate_matrix)
 
         # Quit #
-        self.menu_quit = gtk.MenuItem("Quit")
+        self.menu_quit = Gtk.MenuItem("Quit")
         self.submenu_file.append(self.menu_quit)
-        self.menu_quit.connect("activate", lambda x: gtk.main_quit())
+        self.menu_quit.connect("activate", lambda x: Gtk.main_quit())
 
-        self.menu_file = gtk.MenuItem("File")
+        self.menu_file = Gtk.MenuItem("File")
         self.menu_file.set_submenu(self.submenu_file)
 
 
         # Audit #
-        self.submenu_audit = gtk.Menu()
+        self.submenu_audit = Gtk.Menu()
 
         # Distributed detection #
-        self.menu_distributed_anomaly = gtk.MenuItem("Distributed anomaly detection")
+        self.menu_distributed_anomaly = Gtk.MenuItem("Distributed anomaly detection")
         self.submenu_audit.append(self.menu_distributed_anomaly)
         self.menu_distributed_anomaly.connect("activate", self.distributed_anomaly)
 
         # Query file #
-        self.menu_query_file = gtk.MenuItem("Import query file")
+        self.menu_query_file = Gtk.MenuItem("Import query file")
         self.submenu_audit.append(self.menu_query_file)
         self.menu_query_file.connect("activate", self.on_query_file_import)
 
         # Export #
-        self.menu_export = gtk.MenuItem("Export result")
+        self.menu_export = Gtk.MenuItem("Export result")
         self.submenu_audit.append(self.menu_export)
         self.menu_export.connect("activate", self.on_export)
 
-        self.menu_audit = gtk.MenuItem("Audit")
+        self.menu_audit = Gtk.MenuItem("Audit")
         self.menu_audit.set_submenu(self.submenu_audit)
         self.menu_audit.connect("activate", self.on_audit)
 
         # View #
-        self.submenu_view = gtk.Menu()
+        self.submenu_view = Gtk.Menu()
 
         # Always show firewall name #
-        self.menu_show_fw = gtk.CheckMenuItem("Always show firewall name")
+        self.menu_show_fw = Gtk.CheckMenuItem("Always show firewall name")
         self.submenu_view.append(self.menu_show_fw)
         self.menu_show_fw.connect("activate", self.on_show_firewall_name)
 
         # Always show network value #
-        self.menu_show_net = gtk.CheckMenuItem("Always show network value")
+        self.menu_show_net = Gtk.CheckMenuItem("Always show network value")
         self.submenu_view.append(self.menu_show_net)
         self.menu_show_net.connect("activate", self.on_show_network_name)
 
         # Show routes
-        self.menu_show_routes = gtk.CheckMenuItem("Show routes")
+        self.menu_show_routes = Gtk.CheckMenuItem("Show routes")
         self.submenu_view.append(self.menu_show_routes)
         self.menu_show_routes.connect("activate", self.on_show_routes)
 
-        self.menu_view = gtk.MenuItem("View")
+        self.menu_view = Gtk.MenuItem("View")
         self.menu_view.set_submenu(self.submenu_view)
 
         # Compliance #
-        self.submenu_compliance = gtk.Menu()
+        self.submenu_compliance = Gtk.Menu()
 
         # Import flow matrix #
-        self.menu_import_flow_matrix = gtk.MenuItem("Import flow matrix")
+        self.menu_import_flow_matrix = Gtk.MenuItem("Import flow matrix")
         self.submenu_compliance.append(self.menu_import_flow_matrix)
         self.menu_import_flow_matrix.connect("activate", self.on_import_matrix_file)
 
-        self.menu_create_matrix_flow = gtk.MenuItem("Create a blank matrix flow")
+        self.menu_create_matrix_flow = Gtk.MenuItem("Create a blank matrix flow")
         self.submenu_compliance.append(self.menu_create_matrix_flow)
         self.menu_create_matrix_flow.connect("activate", self.on_create_matrix_flow)
 
-        self.menu_compliance = gtk.MenuItem("Compliance")
+        self.menu_compliance = Gtk.MenuItem("Compliance")
         self.menu_compliance.set_submenu(self.submenu_compliance)
 
         # Menu #
-        self.menubar = gtk.MenuBar()
+        self.menubar = Gtk.MenuBar()
         self.menubar.append(self.menu_file)
         self.menubar.append(self.menu_audit)
         self.menubar.append(self.menu_view)
@@ -201,18 +204,18 @@ class Gtk_MenuBar:
         """
         filename = [] if multiple_select else None
 
-        dialog = gtk.FileChooserDialog(name,
+        dialog = Gtk.FileChooserDialog(name,
                                        None,
-                                       gtk.FILE_CHOOSER_ACTION_OPEN,
-                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                        gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+                                       Gtk.FileChooserAction.OPEN,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
         dialog.set_select_multiple(multiple_select)
-        dialog.set_default_response(gtk.RESPONSE_OK)
+        dialog.set_default_response(Gtk.ResponseType.OK)
         if self.last_folder:
             dialog.set_current_folder(self.last_folder)
 
         response = dialog.run()
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             self.last_folder = dialog.get_current_folder()
             if multiple_select:
                 filename = dialog.get_filenames()
@@ -231,12 +234,12 @@ class Gtk_MenuBar:
         Return
         ------
         Return the file name to save the file"""
-        dialog = gtk.FileChooserDialog(name,
+        dialog = Gtk.FileChooserDialog(name,
                                        None,
-                                       gtk.FILE_CHOOSER_ACTION_SAVE,
-                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                        gtk.STOCK_SAVE, gtk.RESPONSE_OK))
-        dialog.set_default_response(gtk.RESPONSE_OK)
+                                       Gtk.FileChooserAction.SAVE,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        dialog.set_default_response(Gtk.ResponseType.OK)
         if self.last_folder:
             dialog.set_current_folder(self.last_folder)
 
@@ -244,7 +247,7 @@ class Gtk_MenuBar:
 
         filename = None
 
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             filename = dialog.get_filename()
             self.last_folder = dialog.get_current_folder()
         dialog.destroy()
@@ -332,8 +335,8 @@ class Gtk_MenuBar:
             self.next_file = False
             # freeze execution and wait the parser to finish
             while not self.next_file:
-                while gtk.events_pending():
-                    gtk.main_iteration_do(False)
+                while Gtk.events_pending():
+                    Gtk.main_iteration_do(False)
                 time.sleep(0.1)
 
         # Clean all the fw content
@@ -384,7 +387,7 @@ class Gtk_MenuBar:
         if len(self.tmp_fw_list) == 0:
             return
         filename = os.path.dirname(os.path.abspath(__file__)) + "/../input/template_rule_to_excel.xlsx"
-        print filename
+        print(filename)
         toolkit = ExcelToolKit(filename, os.path.dirname(os.path.abspath(__file__)) + "/../Tools/tmp_file/")
         toolkit.unzip_file()
         toolkit.select_sheet(1)
@@ -399,7 +402,7 @@ class Gtk_MenuBar:
         Gtk_Main.Gtk_Main().statusbar.change_message("Extract ready")
         toolkit.save_sheet()
         toolkit.zip_file(os.path.dirname(os.path.abspath(__file__)) + "/../output/rule_to_excel.xlsx")
-        print toolkit.get_value(1, "A")
+        print(toolkit.get_value(1, "A"))
 
     def file_popup_menu(self, filename):
         """Detect firewall type and parse the conf file"""
@@ -408,34 +411,34 @@ class Gtk_MenuBar:
             self.next_file = True
 
         Gtk_Main.Gtk_Main().statusbar.change_message("Import %s" % filename)
-        progressBar = gtk.ProgressBar(adjustment=None)
+        progressBar = Gtk.ProgressBar() # adjustment=None
         progressBar.set_text("Parsing File")
         progressBar.set_fraction(0)
 
-        vbox = gtk.VBox()
-        vbox.pack_start(progressBar)
+        vbox = Gtk.VBox()
+        vbox.pack_start(progressBar, True, True, 0)
 
         button_radio = []
         for p in Parser.parser_list:
-            tmp_radio = gtk.RadioButton(button_radio[0][0] if button_radio else None, p[1])
+            tmp_radio = Gtk.RadioButton(button_radio[0][0] if button_radio else None, p[1])
             button_radio.append((tmp_radio, p[0]))
-            vbox.pack_start(tmp_radio)
+            vbox.pack_start(tmp_radio, True, True, 0)
 
-        button_cancel = gtk.Button("Cancel")
-        button_start = gtk.Button("Start")
-        hbox = gtk.HBox()
-        hbox.pack_start(button_cancel)
-        hbox.pack_start(button_start)
+        button_cancel = Gtk.Button("Cancel")
+        button_start = Gtk.Button("Start")
+        hbox = Gtk.HBox()
+        hbox.pack_start(button_cancel, True, True, 0)
+        hbox.pack_start(button_start, True, True, 0)
 
-        popup = gtk.Window()
+        popup = Gtk.Window()
         popup.set_title(ntpath.basename(filename))
         popup.connect("destroy", lambda x: iter_next())
 
         popup.set_modal(True)
         popup.set_transient_for(Gtk_Main.Gtk_Main().window)
-        popup.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        popup.set_type_hint(Gdk.WindowTypeHint.DIALOG)
 
-        vbox.pack_start(hbox)
+        vbox.pack_start(hbox, True, True, 0)
         popup.add(vbox)
 
         popup.show_all()
@@ -470,34 +473,34 @@ class Gtk_MenuBar:
             self.next_file = True
 
         Gtk_Main.Gtk_Main().statusbar.change_message("Import %s" % (filename))
-        progressBar = gtk.ProgressBar(adjustment=None)
+        progressBar = Gtk.ProgressBar(adjustment=None)
         progressBar.set_text("Parsing File")
         progressBar.set_fraction(0)
 
-        vbox = gtk.VBox()
-        vbox.pack_start(progressBar)
+        vbox = Gtk.VBox()
+        vbox.pack_start(progressBar, True, True, 0)
 
         button_radio = []
         for p in Parser.parser_list:
-            tmp_radio = gtk.RadioButton(button_radio[0][0] if button_radio else None, p[1])
+            tmp_radio = Gtk.RadioButton(button_radio[0][0] if button_radio else None, p[1])
             button_radio.append((tmp_radio, p[0]))
-            vbox.pack_start(tmp_radio)
+            vbox.pack_start(tmp_radio, True, True, 0)
 
-        button_cancel = gtk.Button("Cancel")
-        button_start = gtk.Button("Start")
-        hbox = gtk.HBox()
-        hbox.pack_start(button_cancel)
-        hbox.pack_start(button_start)
+        button_cancel = Gtk.Button("Cancel")
+        button_start = Gtk.Button("Start")
+        hbox = Gtk.HBox()
+        hbox.pack_start(button_cancel, True, True, 0)
+        hbox.pack_start(button_start, True, True, 0)
 
-        popup = gtk.Window()
+        popup = Gtk.Window()
         popup.set_title(ntpath.basename(filename))
         popup.connect("destroy", lambda x: iter_next())
 
         popup.set_modal(True)
         popup.set_transient_for(Gtk_Main.Gtk_Main().window)
-        popup.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        popup.set_type_hint(Gdk.WindowTypeHint.DIALOG)
 
-        vbox.pack_start(hbox)
+        vbox.pack_start(hbox, True, True, 0)
         popup.add(vbox)
 
         popup.show_all()
@@ -557,7 +560,7 @@ class Gtk_MenuBar:
             Gtk_Main.Gtk_Main().notebook.notebook_split.notebook.remove_page(0)
         Gtk_Main.Gtk_Main().notebook.notebook.add_tab(Gtk_Main.Gtk_Main().networkcanvas.vbox, "Topology")
         Gtk_Main.Gtk_Main().notebook.tab_dict.clear()
-        for node in NetworkGraph.NetworkGraph().graph.node.items():
+        for node in list(NetworkGraph.NetworkGraph().graph.node.items()):
             if isinstance(node[0], Firewall):
                 NetworkGraph.NetworkGraph().remove_firewall(node[1]['object'])
 
@@ -618,7 +621,7 @@ class Gtk_MenuBar:
         p.dump([m[0] for m in Gtk_Main.Gtk_Main().lateral_pane.path.model])
         p.dump(Gtk_Main.Gtk_Main().lateral_pane.path_data)
         # save notebook pages
-        p.dump([k for k, v in Gtk_Main.Gtk_Main().notebook.tab_dict.items()])
+        p.dump([k for k, v in list(Gtk_Main.Gtk_Main().notebook.tab_dict.items())])
         fh.close()
         Gtk_Main.Gtk_Main().statusbar.change_message("Ready")
 
@@ -642,25 +645,25 @@ class Gtk_MenuBar:
 
             Gtk_Main.Gtk_Main().notebook.add_distributed_anomaly_tab(distributed_detection)
 
-        check_button = gtk.CheckButton("Deep search")
-        cancel_button = gtk.Button("Cancel")
+        check_button = Gtk.CheckButton("Deep search")
+        cancel_button = Gtk.Button("Cancel")
         cancel_button.connect("clicked", lambda x: popup.destroy())
-        start_button = gtk.Button("Start")
+        start_button = Gtk.Button("Start")
         start_button.connect("clicked", lambda x: start_detection(popup, check_button.get_active()))
 
-        hbox = gtk.HBox()
-        hbox.pack_start(cancel_button)
-        hbox.pack_start(start_button)
+        hbox = Gtk.HBox()
+        hbox.pack_start(cancel_button, True, True, 0)
+        hbox.pack_start(start_button, True, True, 0)
 
-        vbox = gtk.VBox()
-        vbox.pack_start(check_button)
-        vbox.pack_start(hbox)
+        vbox = Gtk.VBox()
+        vbox.pack_start(check_button, True, True, 0)
+        vbox.pack_start(hbox, True, True, 0)
 
-        popup = gtk.Window()
+        popup = Gtk.Window()
         popup.set_title("Distributed detection")
         popup.set_modal(True)
         popup.set_transient_for(Gtk_Main.Gtk_Main().window)
-        popup.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        popup.set_type_hint(Gdk.WindowTypeHint.DIALOG)
         popup.add(vbox)
         popup.show_all()
         Gtk_Main.Gtk_Main().lateral_pane.help_message.change_message(Gtk_Message.ON_DEEP_SEARCH)
@@ -677,7 +680,7 @@ class Gtk_MenuBar:
         query_path = QueryPathParser(filename)
         result = query_path.parse()
         if result:
-            Gtk_DialogBox(result, gtk.MESSAGE_ERROR)
+            Gtk_DialogBox(result, Gtk.MessageType.ERROR)
         else:
             query_path.run()
             Gtk_QueryPath.treeview_output(query_path)
@@ -717,11 +720,11 @@ class Gtk_MenuBar:
         for node in g.nodes():
             # print node
             if isinstance(node, Firewall):
-                print node.route_list
+                print(node.route_list)
             else:
                 pass  # print node.to_string()
 
-        print 'end nodes\n'
+        print('end nodes\n')
         for edge in g.edges(data=True):
             # print edge
 
@@ -735,7 +738,7 @@ class Gtk_MenuBar:
                     routes.append(route)
             output = {}
             for route in routes:
-                if route.gw_ip.to_string() in [key for key in output.keys()]:
+                if route.gw_ip.to_string() in [key for key in list(output.keys())]:
                     output[route.gw_ip.to_string()].append(route.net_ip_dst.to_string() +
                                                            '/' + str(fromDotted2Dec(route.net_mask.to_string())))
                 else:
@@ -748,7 +751,7 @@ class Gtk_MenuBar:
                         tmp2 = "0.0.0.0"
                     output[route.gw_ip.to_string()].append(tmp
                                                            + '/' + str(fromDotted2Dec(tmp2)))
-            print len(output), output
+            print(len(output), output)
             if len(output) > 0:
                 data = Route_info(output, iface)
                 edge[2]['object'].remove()
@@ -774,7 +777,7 @@ class Gtk_MenuBar:
             if ip != None and iface.network != None:
                 if iface.network.to_string() == ip.to_string():
                     return iface
-        print firewall.hostname, ip.to_string()
+        print(firewall.hostname, ip.to_string())
         return
 
 # The following two functions are used to convert an IP address from it

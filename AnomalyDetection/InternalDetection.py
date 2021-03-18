@@ -4,13 +4,14 @@
 from ROBDD.robdd import Robdd
 from ROBDD.synthesis import synthesize, compare, negate_bdd
 from ROBDD.operators import Bdd
-from AnomalyError import AnomalyError
-from AnomalyError import ErrorType
+from .AnomalyError import AnomalyError
+from .AnomalyError import ErrorType
 from collections import deque
 import multiprocessing
 import time
-import gtk
-import Gtk.Gtk_Main
+from gi.repository import Gtk
+import SpringbokUI.Gtk_Main
+from functools import reduce
 
 
 class InternalDetection:
@@ -62,29 +63,29 @@ class InternalDetection:
                                                                               Robdd.true(), Robdd.false(), Robdd.false(),
                                                                               result_queue, processed_id_rules, self.deep_search)))
 
-        Gtk.Gtk_Main.Gtk_Main().create_progress_bar("Anomaly detection", sum([len(a) for a in acl_list]),
+        SpringbokUI.Gtk_Main.Gtk_Main().create_progress_bar("Anomaly detection", sum([len(a) for a in acl_list]),
                                                     self._cancel_detection, *(jobs))
 
         # start jobs
         for job in jobs: job.start()
         # empty queue
         while reduce(lambda x, y: x | y, [job.is_alive() for job in jobs], False):
-            result += [result_queue.get() for _ in xrange(result_queue.qsize())]
+            result += [result_queue.get() for _ in range(result_queue.qsize())]
             processed = reduce(lambda x, _: x + 1,
-                               [processed_id_rules.get() for _ in xrange(processed_id_rules.qsize())], 0)
-            Gtk.Gtk_Main.Gtk_Main().update_progress_bar(processed)
-            Gtk.Gtk_Main.Gtk_Main().update_interface()
+                               [processed_id_rules.get() for _ in range(processed_id_rules.qsize())], 0)
+            SpringbokUI.Gtk_Main.Gtk_Main().update_progress_bar(processed)
+            SpringbokUI.Gtk_Main.Gtk_Main().update_interface()
             time.sleep(0.1)
         # wait jobs finish
         for job in jobs: job.join()
 
-        result += [result_queue.get() for i in xrange(result_queue.qsize())]
+        result += [result_queue.get() for i in range(result_queue.qsize())]
         self.result = result
 
         t1 = time.time()
 
-        Gtk.Gtk_Main.Gtk_Main().change_statusbar('Anomaly internal detection process in %.3f secondes' % (t1 - t0))
-        Gtk.Gtk_Main.Gtk_Main().destroy_progress_bar()
+        SpringbokUI.Gtk_Main.Gtk_Main().change_statusbar('Anomaly internal detection process in %.3f secondes' % (t1 - t0))
+        SpringbokUI.Gtk_Main.Gtk_Main().destroy_progress_bar()
 
         return result
 
@@ -272,7 +273,7 @@ def _detect_anomaly_n2(rules, result_queue):
     error_list = deque()
     error_list_append = error_list.append
 
-    for x in xrange(len(rules)):
+    for x in range(len(rules)):
         rx = rules[x]
         y = x + 1
         while y < len(rules):

@@ -12,10 +12,36 @@ To launch the springbok project you need to have:
 - reportlab
 - graphviz
 
+## Python3, GTK3
+
+Converted with 
+```
+ 2to3-2.7 -w .
+```
+
+```
+sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0
+sudo apt-get install -y mesa-utils libgl1-mesa-glx
+pip install networkx matplotlib reportlab netaddr graphviz python-matplotlib-gtk
+sudo apt install python3-gi python3-gi-cairo gir1.2-gtk-3.0
+```
+
+* updated ply to version 3.11 - `unzip ~/Downloads/ply-3.11.zip`
+
+* This list below is the docker specific setup.
+
+```
+sudo sh -c 'dbus-uuidgen > /var/lib/dbus/machine-id'
+sudo mkdir -p /var/run/dbus
+sudo dbus-daemon --config-file=/usr/share/dbus-1/system.conf --print-address
+sudo apt install at-spi2-core
+sudo apt install dbus-x11
+```
+
 ## Installation
 
 ```
-apt-get install python-gtk2 python-networkx python-matplotlib python-reportlab python-netaddr
+apt-get install python-networkx python-matplotlib python-reportlab python-netaddr
 pip install graphviz
 ```
 

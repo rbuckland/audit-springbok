@@ -1,12 +1,13 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-pygtk.require("2.0")
-import gtk
-import Gtk_QueryPath
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+
+from . import Gtk_QueryPath
 import NetworkGraph.NetworkGraph
-from Gtk_DialogBox import Gtk_DialogBox
+from .Gtk_DialogBox import Gtk_DialogBox
 from SpringBase.Firewall import Firewall
 
 
@@ -39,7 +40,7 @@ class Gtk_Export:
         try:
             fd = open(self.filename, 'w')
         except:
-            Gtk_DialogBox('Error while opening the export file', gtk.MESSAGE_ERROR)
+            Gtk_DialogBox('Error while opening the export file', Gtk.MessageType.ERROR)
             return
 
         self.callback(fd, self.ref)

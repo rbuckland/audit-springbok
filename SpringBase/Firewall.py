@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#import Gtk.Gtk_Main ## remember to uncomment it before use springbok!
-from Protocol import Protocol
-from Ip import Ip
-from Port import Port
-#import Gtk.Gtk_Main
+#import SpringbokUI.Gtk_Main ## remember to uncomment it before use springbok!
+from .Protocol import Protocol
+from .Ip import Ip
+from .Port import Port
+#import SpringbokUI.Gtk_Main
 
 
 ######## Modification of the class by Maurice TCHAMGOUE N. on 22-06-2015
@@ -135,7 +135,7 @@ class Firewall:
         for a in self.acl:
             for rule in a.rules:
                 rule.toBDD()
-                #Gtk.Gtk_Main.Gtk_Main().update_interface()
+                #SpringbokUI.Gtk_Main.Gtk_Main().update_interface()
         self.ready = True
 
     def is_ready(self):
@@ -165,25 +165,25 @@ class Firewall:
             return dict1
 
         for elem in self.dictionnary[name]:
-            if isinstance(elem.items()[0][1], str):
+            if isinstance(list(elem.items())[0][1], str):
                 if not dict1.get('object'):
                     dict1['object'] = []
-                dict1['object'].append(elem.items()[0][1])
-                dict2 = self.resolve(elem.items()[0][1])
+                dict1['object'].append(list(elem.items())[0][1])
+                dict2 = self.resolve(list(elem.items())[0][1])
                 keys = set(dict1).union(dict2)
                 dict1 = dict((k, dict1.get(k, []) + dict2.get(k, [])) for k in keys)
-            elif isinstance(elem.items()[0][1].v1, Protocol):
+            elif isinstance(list(elem.items())[0][1].v1, Protocol):
                 if not dict1.get('protocol'):
                     dict1['protocol'] = []
-                dict1['protocol'].append(elem.items()[0][1].to_string())
-            elif isinstance(elem.items()[0][1].v1, Ip):
+                dict1['protocol'].append(list(elem.items())[0][1].to_string())
+            elif isinstance(list(elem.items())[0][1].v1, Ip):
                 if not dict1.get('ip'):
                     dict1['ip'] = []
-                dict1['ip'].append(elem.items()[0][1].to_string())
-            elif isinstance(elem.items()[0][1].v1, Port):
+                dict1['ip'].append(list(elem.items())[0][1].to_string())
+            elif isinstance(list(elem.items())[0][1].v1, Port):
                 if not dict1.get('port'):
                     dict1['port'] = []
-                dict1['port'].append(elem.items()[0][1].to_string())
+                dict1['port'].append(list(elem.items())[0][1].to_string())
 
         return dict1
 

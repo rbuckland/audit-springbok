@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from ite import Ite
-from sys import maxint
+from .ite import Ite
+from sys import maxsize
 
 
 class Robdd:

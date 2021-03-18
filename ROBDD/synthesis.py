@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from robdd import Robdd
-from operators import Bdd
+from .robdd import Robdd
+from .operators import Bdd
 from collections import defaultdict, deque
 
 
@@ -31,7 +31,7 @@ def compare(expression_a, operator, expression_b):
 # negate a bdd (just invert the value of node pointing to leafs)
 def negate_bdd(bdd):
     neg_bdd = synthesize(bdd, Bdd.AND, Robdd.true())
-    for i in xrange(len(neg_bdd.items)):
+    for i in range(len(neg_bdd.items)):
         neg_bdd.items[i] = tuple((neg_bdd.items[i][0],
                                   not neg_bdd.items[i][1] if neg_bdd.items[i][1] in (True, False) else neg_bdd.items[i][
                                       1],

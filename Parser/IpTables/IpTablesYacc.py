@@ -49,7 +49,7 @@ class ParseHook:
         self.clear()
 
     def resolve(self, value):
-        for k, v in self.object_dict.items():
+        for k, v in list(self.object_dict.items()):
             key = '$' + k
             if key in value:
                 value = value.replace(key, v)
@@ -122,7 +122,7 @@ def update():
 
 def finish():
     # apply default policy
-    for k, v in p_info['default_policy'].items():
+    for k, v in list(p_info['default_policy'].items()):
         for acl in p_info['firewall'].acl:
             if acl.name == k:
                 acl.rules.append(Rule(-1, 'default', [], [], [], [], [], v))
@@ -160,14 +160,14 @@ def get_firewall():
 
 
 def show():
-    print "--------- Object ---------"
-    for k, v in parser.object_dict.items():
-        print '%s :' % k
+    print("--------- Object ---------")
+    for k, v in list(parser.object_dict.items()):
+        print('%s :' % k)
         for elem in v:
-            for k1, v1 in elem.items():
-                print '\t%s %s' % (k1, v1)
-    print "--------- Firewall ---------"
-    print "%s" % p_info['firewall'].to_string()
+            for k1, v1 in list(elem.items()):
+                print('\t%s %s' % (k1, v1))
+    print("--------- Firewall ---------")
+    print("%s" % p_info['firewall'].to_string())
 
 
 # create static list of all interfaces
@@ -780,7 +780,7 @@ def p_target5(p):
 
 def p_default_route_line(p):
     '''route_line : DEFAULT VIA IP_ADDR DEV WORD'''
-    print [p[i] for i in range(len(p))]
+    print([p[i] for i in range(len(p))])
     iface = p_info['firewall'].get_interface_by_name(str(p[5]))
     if not isinstance(iface, Interface) :
         for i in p_info['firewall'].interfaces :
@@ -788,7 +788,7 @@ def p_default_route_line(p):
             if isinstance(iface, Interface) :
                 break
     route = Route(p_info['index_route'], iface, Ip('0.0.0.0'), Ip('0.0.0.0'), Ip(p[3]))
-    print route.to_string()
+    print(route.to_string())
     p_info['route_list'].append(route)
     p_info['index_route'] += 1
 
@@ -796,7 +796,7 @@ def p_default_route_line(p):
 
 def p_route_line2(p):
     '''route_line : IP_ADDR SLASH NUMBER VIA IP_ADDR DEV WORD'''
-    print [p[i] for i in range(len(p))]
+    print([p[i] for i in range(len(p))])
     iface = p_info['firewall'].get_interface_by_name(str(p[5]))
     if not isinstance(iface, Interface) :
         for i in p_info['firewall'].interfaces :
@@ -804,14 +804,14 @@ def p_route_line2(p):
             if isinstance(iface, Interface) :
                 break
     route = Route(p_info['index_route'], iface, Ip(p[1]), Ip(fromDec2Dotted(int(p[3]))), Ip(p[5]))
-    print route.to_string()
+    print(route.to_string())
     p_info['route_list'].append(route)
     p_info['index_route'] += 1
 
 def p_route_line3(p):
     '''route_line : IP_ADDR SLASH NUMBER DEV WORD WORD WORD WORD LINK SRC IP_ADDR
                   | IP_ADDR SLASH NUMBER DEV WORD WORD WORD WORD LINK SRC IP_ADDR WORD NUMBER'''
-    print [p[i] for i in range(len(p))]
+    print([p[i] for i in range(len(p))])
     iface = p_info['firewall'].get_interface_by_name(str(p[5]))
     if not isinstance(iface, Interface) :
         for i in p_info['firewall'].interfaces :
@@ -819,7 +819,7 @@ def p_route_line3(p):
             if isinstance(iface, Interface) :
                 break
     route = Route(p_info['index_route'], iface, Ip(p[1]), Ip(fromDec2Dotted(int(p[3]))), Ip(p[11]))
-    print route.to_string()
+    print(route.to_string())
     p_info['route_list'].append(route)
     p_info['index_route'] += 1
 
@@ -830,7 +830,7 @@ def p_route_line3(p):
 def p_error(p):
     if p_info['raise_on_error']:
         if p:
-            print("Syntax error at '%s'" % p.value)
+            print(("Syntax error at '%s'" % p.value))
         else:
             print("Syntax error at EOF")
         raise SyntaxError
@@ -841,10 +841,10 @@ parser = ParseHook()
 if __name__ == '__main__':
     while True:
         try:
-            s = raw_input('iptables > ')
+            s = input('iptables > ')
         except EOFError:
             break
         if not s: continue
-        print s
+        print(s)
         result = parser.parse(s + '\n')
-        print result
+        print(result)

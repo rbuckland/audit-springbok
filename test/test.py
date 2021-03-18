@@ -6,7 +6,7 @@ sys.path.append("../")
 
 import os
 import re
-from Gtk import Gtk_Main
+from SpringbokUI import Gtk_Main
 
 # Linux console color #
 WHITE = '\033[37m'
@@ -36,26 +36,26 @@ def get_ref(file):
 
 # print main output #
 def display_main():
-    print BLUE + ' ' * 15 + '┌' + '─' * 24 + '┐'
-    print ' ' * 15 + '│' + ' ' * 5 + GREEN + 'Springbok test' + BLUE + ' ' * 5 + '│'
-    print ' ' * 15 + '└' + '─' * 24 + '┘'
-    print '\n.' + WHITE
+    print(BLUE + ' ' * 15 + '┌' + '─' * 24 + '┐')
+    print(' ' * 15 + '│' + ' ' * 5 + GREEN + 'Springbok test' + BLUE + ' ' * 5 + '│')
+    print(' ' * 15 + '└' + '─' * 24 + '┘')
+    print('\n.' + WHITE)
 
 
 # print folder name #
 def display_folder_test(file):
-    print BLUE + '├─ [ ' + YELLOW + file + BLUE + ' ]' + WHITE
+    print(BLUE + '├─ [ ' + YELLOW + file + BLUE + ' ]' + WHITE)
 
 
 # print result OK in green or KO in red #
 def display_result(file, res, ref):
-    print BLUE + '├─── ' + CYAN + file + BLUE + ' ' * (50 - len(file)),
+    print(BLUE + '├─── ' + CYAN + file + BLUE + ' ' * (50 - len(file)), end=' ')
     if re.search(ref, res, re.S):
-        print '[' + GREEN + 'OK' + BLUE + ']' + WHITE
+        print('[' + GREEN + 'OK' + BLUE + ']' + WHITE)
     else:
-        print '[' + RED + 'KO' + BLUE + ']' + WHITE
-        print RED + 'Res : \n' + WHITE + res
-        print RED + 'Ref : \n' + WHITE + ref
+        print('[' + RED + 'KO' + BLUE + ']' + WHITE)
+        print(RED + 'Res : \n' + WHITE + res)
+        print(RED + 'Ref : \n' + WHITE + ref)
 
 
 # redirect stdout stderr to /dev/null #

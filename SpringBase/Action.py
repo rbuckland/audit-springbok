@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from ACL import ACL
+from .ACL import ACL
 import re
 
 

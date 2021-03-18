@@ -1,11 +1,12 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-pygtk.require("2.0")
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 import re
-import gtk
-import Gtk_Main
+
+from . import Gtk_Main
 from AnomalyDetection.DistributedDetection import DistributedDetection
 
 
@@ -24,16 +25,16 @@ class Gtk_SearchBar:
         self.gtk_def = gtk_def
         self.gtk_object = gtk_object
 
-        self.hbox = gtk.HBox()
-        self.entry = gtk.Entry()
-        self.button = gtk.Button("Search")
+        self.hbox = Gtk.HBox()
+        self.entry = Gtk.Entry()
+        self.button = Gtk.Button("Search")
         self.button.connect("clicked", self.on_search)
-        self.hbox.pack_start(self.entry)
+        self.hbox.pack_start(self.entry, True, True, 0)
         self.hbox.pack_start(self.button, False, False, 2)
 
-        self.vbox = gtk.VBox()
+        self.vbox = Gtk.VBox()
         self.vbox.pack_start(self.hbox, False, False, 2)
-        self.vbox.pack_start(self.gtk_object)
+        self.vbox.pack_start(self.gtk_object, True, True, 0)
 
     def on_search(self, widget):
         """Event listener. Launch search"""
@@ -42,7 +43,7 @@ class Gtk_SearchBar:
             Gtk_Main.Gtk_Main().notebook._add_distributed_anomaly(self.ref_object.error_path,
                                                                   self.gtk_def,
                                                                   self.entry.get_text().lower())
-        elif isinstance(self.ref_object, gtk.TextView):
+        elif isinstance(self.ref_object, Gtk.TextView):
             self._conf_highlight()
         else:
             self.gtk_def.search(self.entry.get_text().lower())

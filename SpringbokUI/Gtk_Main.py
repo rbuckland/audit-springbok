@@ -1,17 +1,20 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-from Gtk.Gtk_HelpMessage import Gtk_Message
-pygtk.require("2.0")
-import gtk
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+from gi.repository import Gdk
+
+
+from SpringbokUI.Gtk_HelpMessage import Gtk_Message
 import os
-import Gtk_MenuBar
-import Gtk_NetworkCanvas
-import Gtk_LateralPane
-import Gtk_NoteBook
-import Gtk_StatusBar
-import Gtk_ProgressBar
+from . import Gtk_MenuBar
+from . import Gtk_NetworkCanvas
+from . import Gtk_LateralPane
+from . import Gtk_NoteBook
+from . import Gtk_StatusBar
+from . import Gtk_ProgressBar
 
 
 class Gtk_Main(object):
@@ -44,19 +47,19 @@ class Gtk_Main(object):
     def init_window(self, h=None, w=None, title="Springbok (beta version)"):
         """Init window and all necessary gtk elements"""
         # Create new window
-        self.window = gtk.Window()
-        self.window.connect("destroy", lambda x: gtk.main_quit())
+        self.window = Gtk.Window()
+        self.window.connect("destroy", lambda x: Gtk.main_quit())
         if h is None:
-            h = gtk.gdk.screen_height()
+            h = Gdk.Screen.height()
         if w is None:
-            w = gtk.gdk.screen_width()
+            w = Gdk.Screen.width()
         self.window.set_default_size(w, h)
         self.window.set_title(title)
         fn = os.path.join(os.path.dirname(__file__), '../ressources/icon.png')
         self.window.set_icon_from_file(fn)
 
         ##################### Construct zone #####################
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
         self.window.add(vbox)
 
         # menu #
@@ -64,7 +67,7 @@ class Gtk_Main(object):
         vbox.pack_start(self.menubar.menubar, False, False, 2)
 
         # hpaned #
-        self.hpaned = gtk.HPaned()
+        self.hpaned = Gtk.HPaned()
         vbox.pack_start(self.hpaned, True, True, 2)
 
         # listView #
@@ -82,7 +85,7 @@ class Gtk_Main(object):
 
         # status bar #
         self.statusbar = Gtk_StatusBar.Gtk_StatusBar()
-        vbox.pack_end(self.statusbar.status_bar, False, False)
+        vbox.pack_end(self.statusbar.status_bar, False, False, padding=0)
 
         ###############################################################
 
@@ -96,7 +99,7 @@ class Gtk_Main(object):
         self.count = 0
         self.progress_bar = None
 
-        gtk.main()
+        Gtk.main()
 
     def draw(self):
         """Draw the topology"""
@@ -106,8 +109,8 @@ class Gtk_Main(object):
         """periodically update interface when asked"""
         if self.graphic:
             if not self.count % 10:
-                while gtk.events_pending():
-                    gtk.main_iteration_do(False)
+                while Gtk.events_pending():
+                    Gtk.main_iteration_do(False)
             self.count += 1 % 10
 
     def change_statusbar(self, message):

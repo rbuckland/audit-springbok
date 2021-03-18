@@ -28,8 +28,8 @@ class Route_info:
         self.format_data()
 
     def format_data(self):
-        for gw, networks in self.data.iteritems():
+        for gw, networks in self.data.items():
             self.text += 'GW : ' + gw + '\n'
             for network in networks:
                 self.text += '      net : ' + network + '\n'
-        print self.text
+        print(self.text)

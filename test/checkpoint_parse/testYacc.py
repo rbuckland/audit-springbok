@@ -4,8 +4,8 @@ import ply.lex as lex
 import ply.yacc as yacc
 import re
 
-from testLex import tokens
-from testLex import lex
+from .testLex import tokens
+from .testLex import lex
 from socket import *
 from socket import inet_ntoa
 from struct import pack
@@ -75,7 +75,7 @@ def finish():
     '''
 
     for o in object_dict:
-        for k, v in o.iteritems():
+        for k, v in o.items():
             if k == 'type' and (v in {'gateway', 'gateway_cluster'}):
                 pass
     all = []
@@ -93,11 +93,11 @@ def get_firewall():
 def resolve(name):
     found = False
     for obj in object_dict:
-        if name in obj.values():
+        if name in list(obj.values()):
             found = True
             return obj
     if found == False :
-        print name, 'Object not found !!!'
+        print(name, 'Object not found !!!')
         #raise SyntaxError
     pass
 
@@ -198,7 +198,7 @@ def p_begin_net_obj(p):
     '''begin_net_obj : COLON NETOBJ LPAREN'''
     global cptr, parsing_object_type
     parsing_object_type = "networks"
-    print 'begining of parsing...', parsing_object_type
+    print('begining of parsing...', parsing_object_type)
     cptr += 1
 
 
@@ -244,7 +244,7 @@ def p_type_line(p):
             members = []
         if current_obj['type'] == 'group_with_exclusion' and parsing_exception == True:
             parsing_exception = False
-            print 'end of parsing...exception'
+            print('end of parsing...exception')
 
     elif cptr == 5:
         if p[4] in {'drop', 'accept'} and rule_attr == 'action':
@@ -301,7 +301,7 @@ def p_begin_servboj(p):
     global cptr, parsing_object_type, rule_attr
     if cptr == 1:
         parsing_object_type = "services"
-    print 'begining of parsing...', parsing_object_type
+    print('begining of parsing...', parsing_object_type)
     if cptr == 3 and parsing_object_type == 'rules':
         rule_attr = "services"
     cptr += 1
@@ -366,7 +366,7 @@ def p_attr_line2(p):
 
     if p[2] == 'Name' and parsing_exception == True:
         current_obj['except_obj'] = p[4]
-        print 'beginning of parsing...exception'
+        print('beginning of parsing...exception')
     if p[2] == 'Name' and parsing_group_attr == True:
         members.append(p[4])
         parsing_group_attr = False
@@ -437,10 +437,10 @@ def p_end_obj(p):
             if current_obj['type'] in {'host', 'network', 'machines_range', 'services', 'group', 'Group',
                                        'group_with_exclusion'}.union(services):
                 object_dict.append(dict(current_obj))
-                print current_obj
+                print(current_obj)
 
             elif current_obj['type'] in {'gateway_cluster', 'gateway'}:
-                print current_obj
+                print(current_obj)
                 current_fw = dict(current_obj)
                 object_dict.append(dict(current_obj))
                 current_fw['ifaces'] = list(current_ifaces)
@@ -457,7 +457,7 @@ def p_end_obj(p):
         members = []
         if parsing_object_type == 'rules':
             rules.append(dict(current_rule))
-            print current_rule
+            print(current_rule)
         current_rule.clear()
     elif cptr == 4:
         try:
@@ -467,7 +467,7 @@ def p_end_obj(p):
             pass
         current_iface.clear()
     elif cptr == 1:
-        print 'end of parsing ', parsing_object_type
+        print('end of parsing ', parsing_object_type)
         parsing_object_type = ""
     elif cptr == 3:
         if parsing_interfaces == True :
@@ -482,7 +482,7 @@ def p_begin_rules_line(p):
     global cptr, current_rule, parsing_object_type, rule_attr
     cptr = 2
     parsing_object_type = 'rules'
-    print 'begining of parsing...', parsing_object_type, '-->', p[4]
+    print('begining of parsing...', parsing_object_type, '-->', p[4])
     if cptr == 2: pass
 
 def p_new_rule_line(p):
@@ -599,7 +599,7 @@ def p_error(p):
     #global b, f2
     #f2.write(b[-2000:])
     #f2.close
-    print j
+    print(j)
     raise SyntaxError
     #pass
 
@@ -618,14 +618,14 @@ while True :
         break
     if not s : continue
     result = parser.parse(s, debug=0)
-    print  j, i, cptr
+    print(j, i, cptr)
     #for fw in firewalls :
     #   pass
         #print fw
     #for il in object_dict :
     #   if 'MSN_Messenger_File_Transfer' in il.values() : print il
     finish()
-    print resolve('Net_Pase_relais_entreprise')
+    print(resolve('Net_Pase_relais_entreprise'))
     #for rule in rules : print rule
     #f2.close()
     #print len(hosts)

@@ -26,7 +26,7 @@ from SpringBase.Action import Action
 import NetworkGraph
 import socket
 import re
-import JuniperNetscreenPort
+from . import JuniperNetscreenPort
 import ntpath
 from SpringBase.Route import Route
 from socket import inet_ntoa
@@ -117,7 +117,7 @@ def finish():
     global ifaces, zones
     p_info['firewall'].interfaces = list(ifaces)
     insert_rules()
-    print [a.to_string() for a in p_info['firewall'].interfaces]
+    print([a.to_string() for a in p_info['firewall'].interfaces])
     #if p_info['default_permit_all']:
     #    for acl in p_info['firewall'].acl:
     #        acl.rules.append(Rule(-1, 'default', [], [], [], [], [], Action(True)))
@@ -125,9 +125,9 @@ def finish():
 def get_firewall():
     firewall = p_info['firewall']
     out_zones = ['ZN_IMN', 'ZN_RAEI', 'ZN_GCN']
-    print 'acls---------------------------'
+    print('acls---------------------------')
     for acl in p_info['firewall'].acl:
-        print acl.name
+        print(acl.name)
 
     return [p_info['firewall']]
 
@@ -158,8 +158,8 @@ def insert_rules():
             for dst_iface in dst_ifaces:
                 s_iface = p_info['firewall'].get_interface_by_nameif(src_iface)
                 d_iface = p_info['firewall'].get_interface_by_nameif(dst_iface)
-                print s_iface.to_string()
-                print d_iface.to_string()
+                print(s_iface.to_string())
+                print(d_iface.to_string())
                 NetworkGraph.NetworkGraph.NetworkGraph().bind_acl(_acl,
                                           p_info['firewall'],
                                           p_info['firewall'].get_interface_by_nameif(src_iface),
@@ -204,13 +204,13 @@ def resolve_app(app_list):
 def fill_service(app, protocols, _protocols, _dest_ports, dest_ports):
     for service in services:
         if service['name'] == app:
-            if service.has_key('protocol') :
+            if 'protocol' in service :
                 if service['protocol'] not in protocols:
                     protocols.append(service['protocol'])
                     _protocols.append(Operator('EQ', Protocol(service['protocol'])))
-            if service.has_key('port'):
+            if 'port' in service:
                 _dest_ports.append(Operator('EQ', Port(int(service['port']))))
-            if service.has_key('lport') and service.has_key('rport'):
+            if 'lport' in service and 'rport' in service:
                 _dest_ports.append(Operator('RANGE', Port(int(service['lport'])), Port(int(service['rport']))))
 
 def fill_service_set(app, protocols, _protocols, _dest_ports, dest_ports):
@@ -307,7 +307,7 @@ def p_words_2(p):
 ### hostname_line
 def p_hostname_line(p):
     '''hostname_line : HOST_NAME WORD SEMI_COLON'''
-    print p[2]
+    print(p[2])
 
 ## useful
 def p_level_line(p):
@@ -321,7 +321,7 @@ def p_level_line(p):
         parsing_level2 = 'networks'
     if p[1] == 'global':
         parsing_level3 = 'address'
-        print '-----------------beginning parsing networks-------------------'
+        print('-----------------beginning parsing networks-------------------')
     if p[1] == 'applications':
         parsing_level1 = 'services'
     if p[1] == 'interfaces' and cptr == 1:
@@ -339,7 +339,7 @@ def p_level_line(p):
 
 
     if parsing_level3 == 'zones_ifaces' and cptr == 5:
-        if current_set.has_key('elts'):
+        if 'elts' in current_set:
             current_set['elts'].append(p[1])
         else:
             current_set['elts'] = []
@@ -358,9 +358,9 @@ def p_zone_iface(p):
 
     if parsing_level2 == 'zones' and parsing_level3 == 'zones_ifaces' \
             and cptr == 4:
-        print 'cptr -- >' + str(cptr)
-        print p[1]
-        if current_set.has_key('elts'):
+        print('cptr -- >' + str(cptr))
+        print(p[1])
+        if 'elts' in current_set:
             current_set['elts'].append(p[1])
         else:
             current_set['elts'] = []
@@ -397,7 +397,7 @@ def p_address_line2(p):
     '''address_line : ADDRESS WORD SEMI_COLON'''
     global parsing_level1, parsing_level2, parsing_level3, current_set
     if parsing_level3 == 'address_set':
-        if 'elts' in current_set.keys():
+        if 'elts' in list(current_set.keys()):
             current_set['elts'].append(p[2])
         else:
             current_set['elts'] = []
@@ -454,7 +454,7 @@ def p_service_comp(p):
     '''service_set_line : APPLICATION WORD SEMI_COLON'''
     global parsing_level1, parsing_level2, parsing_level3, current_set
     if parsing_level3 == 'service_set':
-        if 'elts' in current_set.keys():
+        if 'elts' in list(current_set.keys()):
             current_set['elts'].append(p[2])
         else:
             current_set['elts'] = []
@@ -467,7 +467,7 @@ def p_service_comp2(p):
     global parsing_level1, parsing_level2, parsing_level3, current_set
     if parsing_level3 == 'service_set':
         current_set['app_set'] = ''
-        if 'elts' in current_set.keys():
+        if 'elts' in list(current_set.keys()):
             current_set['elts'].append(p[2])
         else:
             current_set['elts'] = []
@@ -640,7 +640,7 @@ def p_action_reject2(p):
 def p_error(p):
     if p_info['raise_on_error']:
         if p:
-            print("Syntax error at '%s'" % p.value)
+            print(("Syntax error at '%s'" % p.value))
         else:
             print("Syntax error at EOF")
         raise SyntaxError
@@ -685,10 +685,10 @@ parser = yacc.yacc(optimize=1)
 if __name__ == '__main__':
     while True:
         try:
-            s = raw_input('JuniperNetscreen > ')
+            s = input('JuniperNetscreen > ')
         except EOFError:
             break
         if not s: continue
-        print s
+        print(s)
         result = parser.parse(s + '\n')
-        print result
+        print(result)

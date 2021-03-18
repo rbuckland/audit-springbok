@@ -1,13 +1,11 @@
-from reportlab.lib.validators import isInstanceOf
-
 __author__ = 'maurice'
 
 #! /usr/bin/python
 #coding:utf8
 
-import pygtk
-pygtk.require('2.0')
-import gtk
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 
 
 from SpringBase.Rule import Rule
@@ -16,17 +14,16 @@ from SpringBase.Ip import Ip
 from SpringBase.Protocol import Protocol
 from SpringBase.Port import Port
 from SpringBase.Action import Action
-from SpringBase.Interface import Interface
 from SpringBase.ACL import ACL
 from SpringBase.Firewall import Firewall
 from ROBDD.synthesis import synthesize
 from ROBDD.synthesis import Bdd
-from Gtk_HelpMessage import Gtk_Message
-import Gtk_Main
+from .Gtk_HelpMessage import Gtk_Message
+from . import Gtk_Main
 from socket import inet_ntoa
 from struct import pack
 
-class Gtk_Nat_Rule:
+class Gtk_Matrix_Table:
 
 
     # To add a new row in the matrix table
@@ -71,7 +68,7 @@ class Gtk_Nat_Rule:
 
     # to update datas when modified by the user
     def on_modify_value(self, cellrenderer, path, new_value, liststore, column):
-        print "updating '%s' to '%s'" % (liststore[path][column], new_value)
+        print("updating '%s' to '%s'" % (liststore[path][column], new_value))
         liststore[path][column] = new_value
         return
 
@@ -131,7 +128,7 @@ class Gtk_Nat_Rule:
                 elif flow[6] == 'accept':
                     current_rule.action = Action(True)
             except KeyError:
-                print 'error'#
+                print('error')#
             self.flows.append(current_rule)
 
     ####  To launch the matrix verification : it will first call the 'get_all_flows'
@@ -141,11 +138,13 @@ class Gtk_Nat_Rule:
         self.flows = []
         self.result.clear()
         self.get_all_flows()
+        print([flow.to_string() for flow in self.flows])
         for flow in self.flows:
             for acl in self.firewall.acl:
                 for rule in acl.rules:
+                    print((self.is_subset(rule, flow) == True), (flow.action.to_string() != rule.action.to_string()))
                     if  ((self.is_subset(rule, flow) == True) and (flow.action.to_string() != rule.action.to_string())):
-                        if self.result.has_key(flow.identifier):
+                        if flow.identifier in self.result:
                             self.result[flow.identifier].append((rule, self.firewall))
                         else:
                             self.result[flow.identifier] = []
@@ -161,52 +160,33 @@ class Gtk_Nat_Rule:
     #  in green or red flows in the matrix flow table according to their fitness
     #  for the firewall
     def show_results_as_colors(self):
-        reds = [row for row in self.liststore if int(row[0]) in self.result.keys()]
-        greens = [row for row in self.liststore if int(row[0]) not in self.result.keys()]
+        reds = [row for row in self.liststore if int(row[0]) in list(self.result.keys())]
+        greens = [row for row in self.liststore if int(row[0]) not in list(self.result.keys())]
         for row in reds:
             self.modify_row_color2(row, 'red')
         for row in greens:
             self.modify_row_color2(row, 'green')
 
     ## return a string representation of the attribute(ip, port, protocol...)
-    def un_list2(self, aList):
-        result = ''
-        for element in aList:
-            result += element
-        return result
-
-    ## return a string representation of the attribute(ip, port, protocol...)
     def un_list(self, aList):
         result = ''
-        if len(aList) == 0:
-            return 'any'
         for element in aList:
-            if isinstance(element, Protocol):
-                result += element.get_service_name(element.get_value()) + ', '
-            elif isinstance(element, Port):
-                result += str(element.get_value()) + ', '
-            elif isinstance(element, Ip):
-                result += element.to_string() + ', '
-            elif isinstance(element, Interface):
-                result += str(element.nameif) + ', '
+            if isinstance(element.v1, Protocol):
+                result += element.v1.get_service_name(element.v1.get_value()) + ', '
+            elif isinstance(element.v1, Port):
+                result += str(element.v1.get_value()) + ', '
+            elif isinstance(element.v1, Ip):
+                result += element.v1.to_string() + ', '
         return result[:-2]
 
-
     ## to fill the matrix flow table with imported flows
-    def add_rules_to_table(self, nat_rule_list):
-        for rule in nat_rule_list:
-            nat_type = ''
-            if rule.nat_type == 'src':
-                nat_type = 'source'
-            elif rule.nat_type == 'dst':
-                nat_type = 'destination'
-            elif rule.nat_type == 'static':
-                nat_type = 'static'
-            self.add_row(['0', self.un_list(rule.protocol), self.un_list(rule.ip_source),
-                          self.un_list(rule.port_source), self.un_list(rule.ip_dest),
-                          self.un_list(rule.port_dest), self.un_list(list(set(rule.in_iface))),
-                          self.un_list(rule.out_iface), self.un_list(list(set(rule.translate_address))),
-                          self.un_list(rule.translate_port), nat_type])
+    def add_flows_to_table(self, flowlist):
+        for flow in flowlist:
+            self.add_row(['0', self.un_list(flow.protocol), self.un_list(flow.ip_source),
+                          self.un_list(flow.port_source), self.un_list(flow.ip_dest),
+                          self.un_list(flow.port_dest),
+                          'accept' if flow.action.to_string() == 'permit' else 'deny',
+                          False, 'white'])
         self.id_calculation()
 
     # used when the save button is clicked
@@ -229,6 +209,8 @@ class Gtk_Nat_Rule:
         f = open(filename, 'w')
         f.write(data)
         f.close()
+        with open(filename) as f:
+            print(f.read())
         Gtk_Main.Gtk_Main().statusbar.change_message("Ready")
 
     # the filechooser for saving file
@@ -242,19 +224,19 @@ class Gtk_Nat_Rule:
         Return
         ------
         Return the file name to save the file"""
-        dialog = gtk.FileChooserDialog(name,
+        dialog = Gtk.FileChooserDialog(name,
                                        None,
-                                       gtk.FILE_CHOOSER_ACTION_SAVE,
-                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                        gtk.STOCK_SAVE, gtk.RESPONSE_OK))
-        dialog.set_default_response(gtk.RESPONSE_OK)
+                                       Gtk.FileChooserAction.SAVE,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        dialog.set_default_response(Gtk.ResponseType.OK)
 
         last_folder = dialog.get_current_folder()
         if last_folder:
             dialog.set_current_folder(last_folder)
         response = dialog.run()
         filename = None
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             filename = dialog.get_filename()
             self.last_folder = dialog.get_current_folder()
         dialog.destroy()
@@ -274,147 +256,124 @@ class Gtk_Nat_Rule:
     #  firewall : the firewall instance on wich the matrix verification
     #  is going to be performed.
 
-    def __init__(self, nat_rule_list, firewall):
+    def __init__(self, flowlist, firewall):
         #the liststore wich will contains all the flows
-        self.liststore = gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str)
+        self.liststore = Gtk.ListStore(str, str, str, str, str, str, str, bool, str)
 
         #the treeview
-        self.treeview = gtk.TreeView(self.liststore)
+        self.treeview = Gtk.TreeView(self.liststore)
 
         #different renderers of type text
-        self.cellId = gtk.CellRendererText()
-        self.cellId.set_property('editable', False)
+        self.cellId = Gtk.CellRendererText()
+        self.cellId.set_property('editable', True)
         self.cellId.set_property('xalign', 0.5)
         self.cellId.connect('edited', self.on_modify_value, self.liststore, 0)
 
-        self.cellProto = gtk.CellRendererText()
-        self.cellProto.set_property('editable', False)
+        self.cellProto = Gtk.CellRendererText()
+        self.cellProto.set_property('editable', True)
         self.cellProto.set_property('xalign', 0.5)
         self.cellProto.connect('edited', self.on_modify_value, self.liststore, 1)
 
-        self.cellIp_src = gtk.CellRendererText()
-        self.cellIp_src.set_property('editable', False)
+        self.cellIp_src = Gtk.CellRendererText()
+        self.cellIp_src.set_property('editable', True)
         self.cellIp_src.set_property('xalign', 0.5)
         self.cellIp_src.connect('edited', self.on_modify_value, self.liststore, 2)
 
-        self.cellPort_src = gtk.CellRendererText()
-        self.cellPort_src.set_property('editable', False)
+        self.cellPort_src = Gtk.CellRendererText()
+        self.cellPort_src.set_property('editable', True)
         self.cellPort_src.set_property('xalign', 0.5)
         self.cellPort_src.connect('edited', self.on_modify_value, self.liststore, 3)
 
-        self.cellIp_dst = gtk.CellRendererText()
-        self.cellIp_dst.set_property('editable', False)
+        self.cellIp_dst = Gtk.CellRendererText()
+        self.cellIp_dst.set_property('editable', True)
         self.cellIp_dst.set_property('xalign', 0.5)
         self.cellIp_dst.connect('edited', self.on_modify_value, self.liststore, 4)
 
-        self.cellPort_dst = gtk.CellRendererText()
-        self.cellPort_dst.set_property('editable', False)
+        self.cellPort_dst = Gtk.CellRendererText()
+        self.cellPort_dst.set_property('editable', True)
         self.cellPort_dst.set_property('xalign', 0.5)
         self.cellPort_dst.connect('edited', self.on_modify_value, self.liststore, 5)
 
-        self.cellIn_iface = gtk.CellRendererText()
-        self.cellIn_iface.set_property('editable', False)
-        self.cellIn_iface.set_property('xalign', 0.5)
-        self.cellIn_iface.connect('edited', self.on_modify_value, self.liststore, 6)
+        self.cellAction = Gtk.CellRendererText()
+        self.cellAction.set_property('editable', True)
+        self.cellAction.connect('edited', self.on_modify_value, self.liststore, 6)
 
-        self.cellOut_iface = gtk.CellRendererText()
-        self.cellOut_iface.set_property('editable', False)
-        self.cellOut_iface.set_property('xalign', 0.5)
-        self.cellOut_iface.connect('edited', self.on_modify_value, self.liststore, 7)
-
-        self.cellNated_ip = gtk.CellRendererText()
-        self.cellNated_ip.set_property('editable', False)
-        self.cellNated_ip.set_property('xalign', 0.5)
-        self.cellNated_ip.connect('edited', self.on_modify_value, self.liststore, 8)
-
-
-        self.cellNated_port = gtk.CellRendererText()
-        self.cellNated_port.set_property('editable', False)
-        self.cellNated_port.set_property('xalign', 0.5)
-        self.cellNated_port.connect('edited', self.on_modify_value, self.liststore, 9)
-
-
-        self.cellNat_type= gtk.CellRendererText()
-        self.cellNat_type.set_property('editable', False)
-        self.cellNat_type.connect('edited', self.on_modify_value, self.liststore, 10)
-
+        self.cellSelected = Gtk.CellRendererToggle()
+        self.cellSelected.set_property("activatable", True)
+        self.cellSelected.connect('toggled', self.on_selected, self.liststore, 7)
 
 
         # different type of columns of our table
-        self.columnId = gtk.TreeViewColumn('Id', self.cellId, text=0)
-        self.columnId.set_resizable(True)
+        self.columnId = Gtk.TreeViewColumn('Id', self.cellId, text=0, background=8)
         self.treeview.append_column(self.columnId)
         self.columnId.set_expand(True)
 
-        self.columnProto = gtk.TreeViewColumn('Protocol', self.cellProto, text=1)
-        self.columnProto.set_resizable(True)
+        self.columnProto = Gtk.TreeViewColumn('Protocol', self.cellProto, text=1, background=8)
         self.treeview.append_column(self.columnProto)
         self.columnProto.set_expand(True)
 
-        self.columnIp_src = gtk.TreeViewColumn('Source IP', self.cellIp_src, text=2)
-        self.columnIp_src.set_resizable(True)
+        self.columnIp_src = Gtk.TreeViewColumn('Source IP', self.cellIp_src, text=2, background=8)
         self.treeview.append_column(self.columnIp_src)
         self.columnIp_src.set_expand(True)
 
-        self.columnPort_src = gtk.TreeViewColumn('Source Port', self.cellPort_src, text=3)
-        self.columnPort_src.set_resizable(True)
+        self.columnPort_src = Gtk.TreeViewColumn('Source Port', self.cellPort_src, text=3, background=8)
         self.treeview.append_column(self.columnPort_src)
         self.columnPort_src.set_expand(True)
 
-        self.columnIp_dst = gtk.TreeViewColumn('Destination IP', self.cellIp_dst, text=4)
-        self.columnIp_dst.set_resizable(True)
+        self.columnIp_dst = Gtk.TreeViewColumn('Destination IP', self.cellIp_dst, text=4, background=8)
         self.treeview.append_column(self.columnIp_dst)
         self.columnIp_dst.set_expand(True)
 
-        self.columnPort_dst = gtk.TreeViewColumn('Destination Port', self.cellPort_dst, text=5)
-        self.columnPort_dst.set_resizable(True)
+        self.columnPort_dst = Gtk.TreeViewColumn('Destination Port', self.cellPort_dst, text=5, background=8)
         self.treeview.append_column(self.columnPort_dst)
         self.columnPort_dst.set_expand(True)
 
-        self.columnIn_iface = gtk.TreeViewColumn('In Interface', self.cellIn_iface, text=6)
-        self.columnIn_iface.set_resizable(True)
-        self.treeview.append_column(self.columnIn_iface)
-        self.columnIn_iface.set_expand(True)
+        self.columnAction = Gtk.TreeViewColumn('Action', self.cellAction, text=6, background=8)
+        self.treeview.append_column(self.columnAction)
+        self.columnId.set_expand(False)
 
-        self.columnOut_iface = gtk.TreeViewColumn('Out Interface', self.cellOut_iface, text=7)
-        self.columnOut_iface.set_resizable(True)
-        self.treeview.append_column(self.columnOut_iface)
-        self.columnOut_iface.set_expand(True)
+        self.columnSelected = Gtk.TreeViewColumn('', self.cellSelected)
+        self.columnSelected.add_attribute(self.cellSelected, 'active', 7)
+        self.columnSelected.set_fixed_width(1)
+        self.treeview.append_column(self.columnSelected)
 
-        self.columnNated_ip = gtk.TreeViewColumn('Nated IP', self.cellNated_ip, text=8)
-        self.columnNated_ip.set_resizable(True)
-        self.treeview.append_column(self.columnNated_ip)
-        self.columnNated_ip.set_expand(True)
-
-        self.columnNat_type = gtk.TreeViewColumn('Nat Type ', self.cellNat_type, text=10)
-        self.columnNat_type.set_resizable(True)
-        self.treeview.append_column(self.columnNat_type)
-        self.columnNat_type.set_expand(False)
-
-
-        self.lastColumn = gtk.TreeViewColumn('')
+        self.lastColumn = Gtk.TreeViewColumn('')
         self.lastColumn.set_expand(False)
         self.lastColumn.set_fixed_width(1)
         self.treeview.append_column(self.lastColumn)
 
 
-        #self.add_flows_to_table(nat_rule_list)
-        self.add_rules_to_table(nat_rule_list)
+        self.add_flows_to_table(flowlist)
 
-        self.scrolled = gtk.ScrolledWindow()
+        self.scrolled = Gtk.ScrolledWindow()
         self.scrolled.add(self.treeview)
-        self.vbox = gtk.VBox()
-        self.hbox = gtk.HBox()
-        self.hbox1 = gtk.HBox()
-        self.vbox1 = gtk.VBox()
+        self.vbox = Gtk.VBox()
+        self.hbox = Gtk.HBox()
+        self.hbox1 = Gtk.HBox()
+        self.vbox1 = Gtk.VBox()
 
+        self.buttonAdd = Gtk.Button('Add')
+        self.buttonAdd.connect('clicked', self.add_empty_row)
 
-        self.vbox.pack_start(self.hbox)
-        #self.vbox.pack_start(self.hbox1)
+        self.buttonRemove = Gtk.Button('Remove')
+        self.buttonRemove.connect('clicked', self.remove_selected_rows)
 
-        self.table = gtk.Table(10, 20, True)
-        self.table.attach(self.scrolled, 0, 20, 0, 10)
-        self.hbox.pack_start(self.table)
+        self.buttonSave = Gtk.Button('Save')
+        self.buttonSave.connect('clicked', self.on_saving_matrix_flow)
+
+        self.buttonLaunch = Gtk.Button('Launch')
+        self.buttonLaunch.connect('clicked', self.launch_verification)
+        self.vbox.pack_start(self.hbox, True, True, 0)
+        self.vbox.pack_start(self.hbox1, True, True, 0)
+
+        self.table = Gtk.Table(10, 20, True)
+        self.table.attach(self.scrolled, 0, 16, 0, 5)
+        self.table.attach(self.buttonAdd, 17, 19, 1, 2)
+        self.table.attach(self.buttonRemove, 17, 19, 2, 3)
+        self.table.attach(self.buttonSave, 17, 19, 3, 4)
+        self.table.attach(self.buttonLaunch, 17, 19, 5, 6)
+
+        self.hbox.pack_start(self.table, True, True, 0)
 
         self.flows = []
         self.firewall = firewall ## remember to change it in firewall (receive in parameter)
@@ -423,7 +382,7 @@ class Gtk_Nat_Rule:
 
         ### Begining of showing results
 
-        self.treeview1 = gtk.TreeView()
+        self.treeview1 = Gtk.TreeView()
 
 
 

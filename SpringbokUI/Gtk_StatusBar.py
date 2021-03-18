@@ -1,10 +1,9 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-pygtk.require("2.0")
-import gtk
-
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 
 class Gtk_StatusBar:
     """Gtk_StatusBar class.
@@ -16,7 +15,7 @@ class Gtk_StatusBar:
     context_id : the gtk status bar context id
     """
     def __init__(self):
-        self.status_bar = gtk.Statusbar()
+        self.status_bar = Gtk.Statusbar()
         self.context_id = self.status_bar.get_context_id("StatusBar")
         self.change_message("Ready")
 

@@ -27,7 +27,7 @@ class Port:
         try:
             self.port = int(port)
         except ValueError:
-            print port
+            print(port)
             self.port = socket.getservbyname(port)
 
     def search(self, pattern):

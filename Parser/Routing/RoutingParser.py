@@ -52,7 +52,7 @@ class RoutingParser:
         try:
             fd = open(filename, 'r')
         except:
-            print 'Error while opening the routing file'
+            print('Error while opening the routing file')
 
         if self.fw.type == "Fortinet FortiGate":
             for line in fd:
@@ -81,7 +81,7 @@ class RoutingParser:
             tmp = Route(id, interface_name, ip_route, mask_route, gw)
             self.routes.append(tmp)
         else:
-            print data[0]
+            print(data[0])
             if '/' in data[0]:
                 ip_route = Ip(data[0].split('/')[0])
                 mask_route = Ip("0.0.0.0", self.fromDec2Dotted(int(data[0].split('/')[1])))
@@ -106,7 +106,7 @@ class RoutingParser:
         try:
             fd = open(filename, 'r')
         except:
-            print 'Error while opening the routing file'
+            print('Error while opening the routing file')
         if self.fw.type == "Iptables":
             for line in fd:
                 data = line.split(" ")

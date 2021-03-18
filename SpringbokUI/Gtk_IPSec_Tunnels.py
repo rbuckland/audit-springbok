@@ -5,9 +5,9 @@ __author__ = 'maurice'
 #! /usr/bin/python
 #coding:utf8
 
-import pygtk
-pygtk.require('2.0')
-import gtk
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 
 from SpringBase.Rule import Rule
 from SpringBase.Operator import Operator
@@ -20,8 +20,8 @@ from SpringBase.ACL import ACL
 from SpringBase.Firewall import Firewall
 from ROBDD.synthesis import synthesize
 from ROBDD.synthesis import Bdd
-from Gtk_HelpMessage import Gtk_Message
-import Gtk_Main
+from .Gtk_HelpMessage import Gtk_Message
+from . import Gtk_Main
 from socket import inet_ntoa
 from struct import pack
 
@@ -69,7 +69,7 @@ class Gtk_IPSec_Tunnels:
 
     # to update datas when modified by the user
     def on_modify_value(self, cellrenderer, path, new_value, liststore, column):
-        print "updating '%s' to '%s'" % (liststore[path][column], new_value)
+        print("updating '%s' to '%s'" % (liststore[path][column], new_value))
         liststore[path][column] = new_value
         return
 
@@ -129,7 +129,7 @@ class Gtk_IPSec_Tunnels:
                 elif flow[6] == 'accept':
                     current_rule.action = Action(True)
             except KeyError:
-                print 'error'#
+                print('error')#
             self.flows.append(current_rule)
 
     ####  To launch the matrix verification : it will first call the 'get_all_flows'
@@ -143,7 +143,7 @@ class Gtk_IPSec_Tunnels:
             for acl in self.firewall.acl:
                 for rule in acl.rules:
                     if  ((self.is_subset(rule, flow) == True) and (flow.action.to_string() != rule.action.to_string())):
-                        if self.result.has_key(flow.identifier):
+                        if flow.identifier in self.result:
                             self.result[flow.identifier].append((rule, self.firewall))
                         else:
                             self.result[flow.identifier] = []
@@ -159,8 +159,8 @@ class Gtk_IPSec_Tunnels:
     #  in green or red flows in the matrix flow table according to their fitness
     #  for the firewall
     def show_results_as_colors(self):
-        reds = [row for row in self.liststore if int(row[0]) in self.result.keys()]
-        greens = [row for row in self.liststore if int(row[0]) not in self.result.keys()]
+        reds = [row for row in self.liststore if int(row[0]) in list(self.result.keys())]
+        greens = [row for row in self.liststore if int(row[0]) not in list(self.result.keys())]
         for row in reds:
             self.modify_row_color2(row, 'red')
         for row in greens:
@@ -190,13 +190,13 @@ class Gtk_IPSec_Tunnels:
 
     ## to fill the matrix flow table with imported flows
     def add_tunels_to_table(self, vpn_list):
-        for map_name, map_data in vpn_list.iteritems():
+        for map_name, map_data in vpn_list.items():
             iface = map_data['iface']
             del map_data['iface']
-            for seq_num, datas in map_data.iteritems():
-                if datas.has_key('acl'):
+            for seq_num, datas in map_data.items():
+                if 'acl' in datas:
                     for rule in datas['acl'].rules:
-                        print 'rules', rule.to_string()
+                        print('rules', rule.to_string())
                         self.add_row(['0', map_name, seq_num, iface.name, iface.network.to_string(),
                                       datas['peer_dst'].to_string(), self.un_list(rule.protocol),
                                       self.un_list(rule.ip_source), self.un_list(rule.port_source),
@@ -239,19 +239,19 @@ class Gtk_IPSec_Tunnels:
         Return
         ------
         Return the file name to save the file"""
-        dialog = gtk.FileChooserDialog(name,
+        dialog = Gtk.FileChooserDialog(name,
                                        None,
-                                       gtk.FILE_CHOOSER_ACTION_SAVE,
-                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                        gtk.STOCK_SAVE, gtk.RESPONSE_OK))
-        dialog.set_default_response(gtk.RESPONSE_OK)
+                                       Gtk.FileChooserAction.SAVE,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        dialog.set_default_response(Gtk.ResponseType.OK)
 
         last_folder = dialog.get_current_folder()
         if last_folder:
             dialog.set_current_folder(last_folder)
         response = dialog.run()
         filename = None
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             filename = dialog.get_filename()
             self.last_folder = dialog.get_current_folder()
         dialog.destroy()
@@ -273,124 +273,124 @@ class Gtk_IPSec_Tunnels:
 
     def __init__(self,  vpn_list, firewall):
         # the liststore wich will contains all the flows
-        self.liststore = gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str)
+        self.liststore = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str)
 
         # the treeview
-        self.treeview = gtk.TreeView(self.liststore)
+        self.treeview = Gtk.TreeView(self.liststore)
 
         # different renderers of type text
-        self.cellId = gtk.CellRendererText()
+        self.cellId = Gtk.CellRendererText()
         self.cellId.set_property('editable', False)
         self.cellId.set_property('xalign', 0.5)
         self.cellId.connect('edited', self.on_modify_value, self.liststore, 0)
 
-        self.cellMap_name = gtk.CellRendererText()
+        self.cellMap_name = Gtk.CellRendererText()
         self.cellMap_name.set_property('editable', False)
         self.cellMap_name.set_property('xalign', 0.5)
         self.cellMap_name.connect('edited', self.on_modify_value, self.liststore, 1)
 
-        self.cellSeq_number = gtk.CellRendererText()
+        self.cellSeq_number = Gtk.CellRendererText()
         self.cellSeq_number.set_property('editable', False)
         self.cellSeq_number.set_property('xalign', 0.5)
         self.cellSeq_number.connect('edited', self.on_modify_value, self.liststore, 2)
 
-        self.cellIface = gtk.CellRendererText()
+        self.cellIface = Gtk.CellRendererText()
         self.cellIface.set_property('editable', False)
         self.cellIface.set_property('xalign', 0.5)
         self.cellIface.connect('edited', self.on_modify_value, self.liststore, 3)
 
-        self.cellLocal_peer = gtk.CellRendererText()
+        self.cellLocal_peer = Gtk.CellRendererText()
         self.cellLocal_peer.set_property('editable', False)
         self.cellLocal_peer.set_property('xalign', 0.5)
         self.cellLocal_peer.connect('edited', self.on_modify_value, self.liststore, 4)
 
-        self.cellRemote_peer = gtk.CellRendererText()
+        self.cellRemote_peer = Gtk.CellRendererText()
         self.cellRemote_peer.set_property('editable', False)
         self.cellRemote_peer.set_property('xalign', 0.5)
         self.cellRemote_peer.connect('edited', self.on_modify_value, self.liststore, 5)
 
-        self.cellProto = gtk.CellRendererText()
+        self.cellProto = Gtk.CellRendererText()
         self.cellProto.set_property('editable', False)
         self.cellProto.set_property('xalign', 0.5)
         self.cellProto.connect('edited', self.on_modify_value, self.liststore, 6)
 
-        self.cellIp_src = gtk.CellRendererText()
+        self.cellIp_src = Gtk.CellRendererText()
         self.cellIp_src.set_property('editable', False)
         self.cellIp_src.set_property('xalign', 0.5)
         self.cellIp_src.connect('edited', self.on_modify_value, self.liststore, 7)
 
-        self.cellPort_src = gtk.CellRendererText()
+        self.cellPort_src = Gtk.CellRendererText()
         self.cellPort_src.set_property('editable', False)
         self.cellPort_src.set_property('xalign', 0.5)
         self.cellPort_src.connect('edited', self.on_modify_value, self.liststore, 8)
 
-        self.cellIp_dst = gtk.CellRendererText()
+        self.cellIp_dst = Gtk.CellRendererText()
         self.cellIp_dst.set_property('editable', False)
         self.cellIp_dst.set_property('xalign', 0.5)
         self.cellIp_dst.connect('edited', self.on_modify_value, self.liststore, 9)
 
-        self.cellPort_dst = gtk.CellRendererText()
+        self.cellPort_dst = Gtk.CellRendererText()
         self.cellPort_dst.set_property('editable', False)
         self.cellPort_dst.set_property('xalign', 0.5)
         self.cellPort_dst.connect('edited', self.on_modify_value, self.liststore, 10)
 
         # different type of columns of our table
-        self.columnId = gtk.TreeViewColumn('Id', self.cellId, text=0)
+        self.columnId = Gtk.TreeViewColumn('Id', self.cellId, text=0)
         self.columnId.set_resizable(True)
         self.treeview.append_column(self.columnId)
         self.columnId.set_expand(True)
 
-        self.columnMap_name = gtk.TreeViewColumn('Map name', self.cellMap_name, text=1)
+        self.columnMap_name = Gtk.TreeViewColumn('Map name', self.cellMap_name, text=1)
         self.columnMap_name.set_resizable(True)
         self.treeview.append_column(self.columnMap_name)
         self.columnMap_name.set_expand(True)
 
-        self.columnSeq_number = gtk.TreeViewColumn('Seq Number', self.cellSeq_number, text=2)
+        self.columnSeq_number = Gtk.TreeViewColumn('Seq Number', self.cellSeq_number, text=2)
         self.columnSeq_number.set_resizable(True)
         self.treeview.append_column(self.columnSeq_number)
         self.columnSeq_number.set_expand(True)
 
-        self.columnIface = gtk.TreeViewColumn('Interface', self.cellIface, text=3)
+        self.columnIface = Gtk.TreeViewColumn('Interface', self.cellIface, text=3)
         self.columnIface.set_resizable(True)
         self.treeview.append_column(self.columnIface)
         self.columnIface.set_expand(True)
 
-        self.columnLocal_peer = gtk.TreeViewColumn('Local peer', self.cellLocal_peer, text=4)
+        self.columnLocal_peer = Gtk.TreeViewColumn('Local peer', self.cellLocal_peer, text=4)
         self.columnLocal_peer.set_resizable(True)
         self.treeview.append_column(self.columnLocal_peer)
         self.columnLocal_peer.set_expand(True)
 
-        self.columnRemote_peer = gtk.TreeViewColumn('Remote peer', self.cellRemote_peer, text=5)
+        self.columnRemote_peer = Gtk.TreeViewColumn('Remote peer', self.cellRemote_peer, text=5)
         self.columnRemote_peer.set_resizable(True)
         self.treeview.append_column(self.columnRemote_peer)
         self.columnRemote_peer.set_expand(True)
 
-        self.columnProto = gtk.TreeViewColumn('Protocol', self.cellProto, text=6)
+        self.columnProto = Gtk.TreeViewColumn('Protocol', self.cellProto, text=6)
         self.columnProto.set_resizable(True)
         self.treeview.append_column(self.columnProto)
         self.columnProto.set_expand(True)
 
-        self.columnIp_src = gtk.TreeViewColumn('Source IP', self.cellIp_src, text=7)
+        self.columnIp_src = Gtk.TreeViewColumn('Source IP', self.cellIp_src, text=7)
         self.columnIp_src.set_resizable(True)
         self.treeview.append_column(self.columnIp_src)
         self.columnIp_src.set_expand(True)
 
-        self.columnPort_src = gtk.TreeViewColumn('Source Port', self.cellPort_src, text=8)
+        self.columnPort_src = Gtk.TreeViewColumn('Source Port', self.cellPort_src, text=8)
         self.columnPort_src.set_resizable(True)
         self.treeview.append_column(self.columnPort_src)
         self.columnPort_src.set_expand(True)
 
-        self.columnIp_dst = gtk.TreeViewColumn('Destination IP', self.cellIp_dst, text=9)
+        self.columnIp_dst = Gtk.TreeViewColumn('Destination IP', self.cellIp_dst, text=9)
         self.columnIp_dst.set_resizable(True)
         self.treeview.append_column(self.columnIp_dst)
         self.columnIp_dst.set_expand(True)
 
-        self.columnPort_dst = gtk.TreeViewColumn('Destination Port', self.cellPort_dst, text=10)
+        self.columnPort_dst = Gtk.TreeViewColumn('Destination Port', self.cellPort_dst, text=10)
         self.columnPort_dst.set_resizable(True)
         self.treeview.append_column(self.columnPort_dst)
         self.columnPort_dst.set_expand(True)
 
-        self.lastColumn = gtk.TreeViewColumn('')
+        self.lastColumn = Gtk.TreeViewColumn('')
         self.lastColumn.set_expand(False)
         self.lastColumn.set_fixed_width(1)
         self.treeview.append_column(self.lastColumn)
@@ -398,19 +398,19 @@ class Gtk_IPSec_Tunnels:
         # self.add_flows_to_table(nat_rule_list)
         self.add_tunels_to_table(vpn_list)
 
-        self.scrolled = gtk.ScrolledWindow()
+        self.scrolled = Gtk.ScrolledWindow()
         self.scrolled.add(self.treeview)
-        self.vbox = gtk.VBox()
-        self.hbox = gtk.HBox()
-        self.hbox1 = gtk.HBox()
-        self.vbox1 = gtk.VBox()
+        self.vbox = Gtk.VBox()
+        self.hbox = Gtk.HBox()
+        self.hbox1 = Gtk.HBox()
+        self.vbox1 = Gtk.VBox()
 
-        self.vbox.pack_start(self.hbox)
-        # self.vbox.pack_start(self.hbox1)
+        self.vbox.pack_start(self.hbox, True, True, 0)
+        # self.vbox.pack_start(self.hbox1, True, True, 0)
 
-        self.table = gtk.Table(10, 20, True)
+        self.table = Gtk.Table(10, 20, True)
         self.table.attach(self.scrolled, 0, 20, 0, 10)
-        self.hbox.pack_start(self.table)
+        self.hbox.pack_start(self.table, True, True, 0)
 
         self.flows = []
         self.firewall = firewall  # remember to change it in firewall (receive in parameter)
@@ -418,4 +418,4 @@ class Gtk_IPSec_Tunnels:
 
         # Begining of showing results
 
-        self.treeview1 = gtk.TreeView()
+        self.treeview1 = Gtk.TreeView()

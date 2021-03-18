@@ -92,7 +92,7 @@ def restore_or_create_fw(vdom):
             p_info['used_object'] = fw_vdom.used_object
             p_info['bounded_rules'] = fw_vdom.bounded_rules
             # object_dict = p_info['firewall'].dictionnary not possible (outer scope)
-            for k, v in p_info['firewall'].dictionnary.items():
+            for k, v in list(p_info['firewall'].dictionnary.items()):
                 object_dict[k] = v
             return
 
@@ -146,26 +146,26 @@ def get_firewall():
                     fw_vdom.fw.interfaces.append(itf)
                     break
     end_zones()
-    print 'acls---------------------------b'
+    print('acls---------------------------b')
     path = os.path.dirname(os.path.abspath(__file__)) + "/../../output/"
     out = open(path + 'outrules.txt', 'w')
     for fw_vdom in p_info['firewall_list']:
         for acl in fw_vdom.fw.acl:
             for rule in acl.rules:
-                print rule.new_to_string(fw_vdom)
+                print(rule.new_to_string(fw_vdom))
                 out.write(rule.new_to_string(fw_vdom))
-    print 'acls---------------------------e'
+    print('acls---------------------------e')
     out.close()
     return [fw_vdom.fw for fw_vdom in p_info['firewall_list']]
 
 
 def end_zones():
-    print '--------------Zone list-------------------'
-    print p_info['zone_list']
+    print('--------------Zone list-------------------')
+    print(p_info['zone_list'])
     path = os.path.dirname(os.path.abspath(__file__)) + "/../../output/"
     f = open(path + 'zones2', 'w')
-    for k, v in p_info['zone_list'].iteritems():
-        print 'zone name : ', k
+    for k, v in p_info['zone_list'].items():
+        print('zone name : ', k)
         f.write(k + '\n')
         for fw_vdom in p_info['firewall_list']:
             for if_name in v:
@@ -176,14 +176,14 @@ def end_zones():
     f.close()
 
 def show():
-    print "--------- Object ---------"
-    for k, v in object_dict.items():
-        print '%s :' % k
+    print("--------- Object ---------")
+    for k, v in list(object_dict.items()):
+        print('%s :' % k)
         for elem in v:
-            for k1, v1 in elem.items():
-                print '\t%s %s' % (k1, v1)
-    print "--------- Firewall ---------"
-    print "%s" % p_info['firewall'].to_string()
+            for k1, v1 in list(elem.items()):
+                print('\t%s %s' % (k1, v1))
+    print("--------- Firewall ---------")
+    print("%s" % p_info['firewall'].to_string())
 
 
 def try_resolve_service(name):
@@ -209,14 +209,14 @@ def resolve(name, src_dest=None):
     if name not in object_dict:
         if src_dest == 'service' and try_resolve_service(name.lower()):
             return
-        print 'Critical: %s not found in dictionary' % name
+        print('Critical: %s not found in dictionary' % name)
         raise SyntaxError
 
     p_info['used_object'].add(name)
     values = object_dict[name]
 
     for elem in values:
-        for k1, v1 in elem.items():
+        for k1, v1 in list(elem.items()):
             if k1 == 'object':
                 resolve(v1, src_dest)
             if k1 == 'address':
@@ -864,7 +864,7 @@ def p_next_line(p):
 def p_error(p):
     if p_info['raise_on_error']:
         if p:
-            print("Syntax error at '%s'" % p.value)
+            print(("Syntax error at '%s'" % p.value))
         else:
             print("Syntax error at EOF")
         raise SyntaxError
@@ -876,10 +876,10 @@ parser = yacc.yacc(optimize=1)
 if __name__ == '__main__':
     while True:
         try:
-            s = raw_input('FortiGate > ')
+            s = input('FortiGate > ')
         except EOFError:
             break
         if not s: continue
-        print s
+        print(s)
         result = parser.parse(s + '\n')
-        print result
+        print(result)

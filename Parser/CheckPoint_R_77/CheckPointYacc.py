@@ -155,9 +155,9 @@ def finish_serv(s):
     if tmpObj['type'] in {'udp', 'UDP', 'Udp', 'tcp', 'Tcp', 'TCP', 'icmp', 'Icmp', 'igmp', 'Igmp',
                            'Gre', 'gre', 'GRE', 'ospf', 'OSPF', 'Ospf'}:
         p_info['current_rule'].protocol.append(Operator('EQ', Protocol(tmpObj['type'].lower())))
-        if tmpObj.has_key('port') :
+        if 'port' in tmpObj :
             p_info['current_rule'].port_dest.append(Operator('EQ', Port(tmpObj['port'])))
-        elif tmpObj.has_key('portL'):
+        elif 'portL' in tmpObj:
             if tmpObj['portR'] == 'infinite':
                 p_info['current_rule'].port_dest.append(Operator('GT', Port(tmpObj['portL'])))
             else:
@@ -169,9 +169,9 @@ def finish_serv(s):
             if subTmpOBj['type'] in {'udp', 'UDP', 'Udp', 'tcp', 'Tcp', 'TCP', 'icmp', 'Icmp',
                                      'igmp', 'Igmp', 'Gre', 'gre', 'GRE', 'ospf', 'OSPF', 'Ospf'}:
                 p_info['current_rule'].protocol.append(Operator('EQ', Protocol(subTmpOBj['type'].lower())))
-            if subTmpOBj.has_key('port') :
+            if 'port' in subTmpOBj :
                 p_info['current_rule'].port_dest.append(Operator('EQ', Port(subTmpOBj['port'])))
-            elif subTmpOBj.has_key('portL'):
+            elif 'portL' in subTmpOBj:
                 p_info['current_rule'].port_dest.append(Operator('RANGE', Port(subTmpOBj['portL']),
                                                                  Port(subTmpOBj['portR'])))
     elif tmpObj['type'] in {'other', 'Other'}:
@@ -194,7 +194,7 @@ def finish_fw(acls):
                 p_info['firewall'].interfaces.append(Interface(iface['name'], Ip(iface['ipaddr'], iface['netmask']),
                                                                iface['index']))
 
-        for name, acl in acls.iteritems():
+        for name, acl in acls.items():
             if name == p_info['firewall'].hostname:
                 newAcl = ACL(name)
                 newAcl.rules = acl
@@ -204,7 +204,7 @@ def finish_fw(acls):
 
 # to fill the dictionary of network objects
 def fill_obj_dict_netobj(obj):
-    if nd.has_key(obj['name']):
+    if obj['name'] in nd:
         nd[obj['name']].append({obj['name']: Operator('EQ', Ip(obj['ipaddr']))})
     else:
         nd[obj['name']] = list()
@@ -212,25 +212,25 @@ def fill_obj_dict_netobj(obj):
 
 # to fill the dictionnary of services objects (port)
 def fill_obj_dict_serv1(obj):
-    if nd.has_key(obj['name']):
-        if obj.has_key('portL'):
+    if obj['name'] in nd:
+        if 'portL' in obj:
             nd[obj['name']].append({obj['name']: Operator('RANGE', Port(obj['portL']), Port(obj['portR']))})
-        elif obj.has_key('port'):
+        elif 'port' in obj:
             nd[obj['name']].append({obj['name']: Operator('EQ', Port(obj['port']))})
     else:
         nd[obj['name']] = list()
-        if obj.has_key('portL'):
+        if 'portL' in obj:
             if obj['portR'] == 'infinite':
                 nd[obj['name']].append({obj['name']: Operator('GT', Port(obj['portL']))})
             else:
                 nd[obj['name']].append({obj['name']: Operator('RANGE', Port(obj['portL']), Port(obj['portR']))})
-        elif obj.has_key('port'):
+        elif 'port' in obj:
             nd[obj['name']].append({obj['name']: Operator('EQ', Port(obj['port']))})
         else: pass#print obj ????????????????????????????????
 
 # to fill the dictionnary of protocol (part 1)
 def fill_obj_dict_serv2(obj):
-    if nd.has_key(obj['name']):
+    if obj['name'] in nd:
         nd[obj['name']].append({obj['name']: Operator('EQ', Protocol(obj['protocol']))})
     else:
         nd[obj['name']] = list()
@@ -238,7 +238,7 @@ def fill_obj_dict_serv2(obj):
 
 # to fill the dictionnary of protocol (part 1)
 def fill_obj_dict_serv3(obj):
-    if nd.has_key(obj['name']):
+    if obj['name'] in nd:
         nd[obj['name']].append({obj['name']: Operator('EQ', Protocol(obj['type'].lower()))})
     else:
         nd[obj['name']] = list()
@@ -272,7 +272,7 @@ def finish():
             for s in rule['services']:
                 finish_serv(s)
 
-        if acls.has_key(rule['install'][0]):
+        if rule['install'][0] in acls:
             acls[rule['install'][0]].append(p_info['current_rule'])
         else:
             acls[rule['install'][0]] = []
@@ -303,11 +303,11 @@ def get_firewall():
 def resolve(name):
     found = False
     for obj in object_dict:
-        if name in obj.values():
+        if name in list(obj.values()):
             p_info['used_object'].add(name)
             return obj
     if found == False :
-        print name, 'Object not found !!!'
+        print(name, 'Object not found !!!')
         raise SyntaxError
 
 #### Just to retrieve a Firewall object by the name of it.
@@ -458,7 +458,7 @@ def p_begin_net_obj(p):
     '''begin_net_obj : COLON NETOBJ LPAREN NETOBJ'''
     global cptr, parsing_object_type
     parsing_object_type = "networks"
-    print 'begining of parsing...', parsing_object_type
+    print('begining of parsing...', parsing_object_type)
     cptr += 1
 
 ### Parsing the object name
@@ -504,7 +504,7 @@ def p_type_line(p):
             current_obj['members'] = []
         if current_obj['type'] == 'group_with_exclusion': #and parsing_exception == True:
             parsing_exception = False
-            print 'end of parsing...exception'
+            print('end of parsing...exception')
     elif cptr == 5:
         if p[4] in {'drop', 'accept'} and rule_attr == 'action':
             current_rule['action'] = p[4]
@@ -570,7 +570,7 @@ def p_begin_servboj(p):
     '''servobj_begin_line : COLON SERVOBJ LPAREN SERVOBJ'''
     global cptr, parsing_object_type
     parsing_object_type = "services"
-    print 'begining of parsing...', parsing_object_type
+    print('begining of parsing...', parsing_object_type)
 
     cptr += 1
 
@@ -620,7 +620,7 @@ def p_begin_rule_line(p):
     global cptr, current_rule, parsing_object_type
     cptr = 2
     parsing_object_type = 'rules'
-    print 'begining of parsing...', parsing_object_type
+    print('begining of parsing...', parsing_object_type)
     if cptr == 2: pass
 
 ### Parsing the rule number
@@ -698,7 +698,7 @@ def p_attr_line2(p):
     global current_obj, parsing_exception
     if p[2] == 'Name' and parsing_exception == True:
         current_obj['except_obj'] = p[4]
-        print 'beginning of parsing...exception'
+        print('beginning of parsing...exception')
 
 
 
@@ -760,7 +760,7 @@ def p_end_obj(p):
             if current_obj['type'] in {'host', 'network', 'machines_range', 'services', 'group',
                                        'Group', 'group_with_exclusion'}.union(services):
                 object_dict.append(dict(current_obj))
-                print current_obj
+                print(current_obj)
             elif current_obj['type'] in {'gateway_cluster', 'gateway'}:
                 current_fw = dict(current_obj)
                 object_dict.append(dict(current_obj))
@@ -787,7 +787,7 @@ def p_end_obj(p):
         current_iface.clear()
     elif cptr == 1:
         if parsing_object_type:
-            print 'end of parsing ', parsing_object_type
+            print('end of parsing ', parsing_object_type)
         parsing_object_type = ""
     elif cptr == 3:
         rule_attr = ""
@@ -797,7 +797,7 @@ def p_end_obj(p):
 def p_error(p):
     if p_info['raise_on_error']:
         if p:
-            print("Syntax error at '%s'" % p.value)
+            print(("Syntax error at '%s'" % p.value))
         else:
             print("Syntax error at EOF")
         raise SyntaxError
@@ -808,10 +808,10 @@ parser = yacc.yacc(optimize=1)
 if __name__ == '__main__':
     while True:
         try:
-            s = raw_input('CheckPoint > ')
+            s = input('CheckPoint > ')
         except EOFError:
             break
         if not s: continue
-        print s
+        print(s)
         result = parser.parse(s + '\n')
-        print result
+        print(result)

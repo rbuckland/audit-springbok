@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 
-pygtk.require("2.0")
-import gtk
-import Gtk_Main
+from . import Gtk_Main
 import time
 
 
@@ -19,7 +19,7 @@ class Gtk_ProgressBar():
     popup : gtk window
     """
     def __init__(self, text, max_value, callable=None, *args):
-        self.progress_bar = gtk.ProgressBar(adjustment=None)
+        self.progress_bar = Gtk.ProgressBar() # adjustment=None
         self.progress_bar.set_text(text)
         self.progress_bar.set_fraction(0)
 
@@ -28,21 +28,21 @@ class Gtk_ProgressBar():
         self.max_value = max_value if max_value else 1
         self.start_time = time.time()
 
-        self.popup = gtk.Window()
+        self.popup = Gtk.Window()
         self.popup.set_title("Processing ...")
 
         self.popup.set_modal(True)
         self.popup.set_transient_for(Gtk_Main.Gtk_Main().window)
-        self.popup.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        self.popup.set_type_hint(Gdk.WindowTypeHint.DIALOG)
 
-        self.vbox = gtk.VBox()
-        self.vbox.pack_start(self.progress_bar)
+        self.vbox = Gtk.VBox()
+        self.vbox.pack_start(self.progress_bar, True, True, 0)
 
         if callable:
-            self.cancel_button = gtk.Button("Cancel")
+            self.cancel_button = Gtk.Button("Cancel")
             self.cancel_button.connect("clicked", callable, args)
             self.popup.connect("destroy", callable, args)
-            self.vbox.pack_start(self.cancel_button)
+            self.vbox.pack_start(self.cancel_button, True, True, 0)
 
         self.popup.add(self.vbox)
 

@@ -1,9 +1,11 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-pygtk.require("2.0")
-import gtk
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+from gi.repository import Gdk
+
 
 
 class Gtk_Message(object):
@@ -71,10 +73,10 @@ class Gtk_HelpMessage:
     This class is used to show formated help message
     """
     def __init__(self):
-        self.label = gtk.Label()
-        self.eb = gtk.EventBox()
+        self.label = Gtk.Label()
+        self.eb = Gtk.EventBox()
         self.eb.add(self.label)
-        self.eb.modify_bg(gtk.STATE_NORMAL, gtk.gdk.color_parse("lightgray"))
+        self.eb.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse("lightgray"))
         self.change_message(Gtk_Message.WELCOME_MESSAGE)
 
     def change_message(self, message):

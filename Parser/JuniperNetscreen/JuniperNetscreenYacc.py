@@ -29,7 +29,7 @@ from SpringBase.Action import Action
 import NetworkGraph
 import socket
 import re
-import JuniperNetscreenPort
+from . import JuniperNetscreenPort
 import ntpath
 from SpringBase.Route import Route
 from socket import inet_ntoa
@@ -102,17 +102,17 @@ def get_firewall():
 
 
 def show():
-    print "--------- Object ---------"
-    for k, v in object_dict.items():
-        print '%s :' % k
+    print("--------- Object ---------")
+    for k, v in list(object_dict.items()):
+        print('%s :' % k)
         for elem in v:
-            for k1, v1 in elem.items():
+            for k1, v1 in list(elem.items()):
                 if k1 == 'object':
-                    print '\t%s %s' % (k1, v1)
+                    print('\t%s %s' % (k1, v1))
                 else:
-                    print '\t%s %s' % (k1, v1.to_string())
-    print "--------- Firewall ---------"
-    print "%s" % p_info['firewall'].to_string()
+                    print('\t%s %s' % (k1, v1.to_string()))
+    print("--------- Firewall ---------")
+    print("%s" % p_info['firewall'].to_string())
 
 
 def insert_rule():
@@ -183,7 +183,7 @@ def resolve(name, policy, src_dst=None):
                 policy.protocol.append(Operator('EQ', Protocol('icmp')))
                 policy.protocol_name.append(name)
             else:
-                print 'Critical: %s not found in dictionary' % name
+                print('Critical: %s not found in dictionary' % name)
                 raise SyntaxError
         else:
             resolve_predefined_juniper(name, policy)
@@ -192,7 +192,7 @@ def resolve(name, policy, src_dst=None):
         values = object_dict[name]
 
         for elem in values:
-            for k1, v1 in elem.items():
+            for k1, v1 in list(elem.items()):
                 if k1 == 'object':
                     resolve(v1, policy, src_dst)
                 elif k1 == 'address':
@@ -770,21 +770,21 @@ def p_route_line(p) :
             iface = i.get_subif_by_nameif(str(p[7]))
             if isinstance(iface, Interface) : break
 
-    print iface.name
+    print(iface.name)
     route = Route(p_info['index_route'], iface, Ip(p[3]), Ip(str(calcDottedMask(int(p[5])))), Ip(p[9]))
-    print 'ok'
+    print('ok')
     p_info['route_list'].append(route)
     p_info['index_route'] += 1
-    print route.to_string()
+    print(route.to_string())
     print ('okk')
-    print 'pb instanticiation de la route'
+    print('pb instanticiation de la route')
 
 
 
 def p_error(p):
     if p_info['raise_on_error']:
         if p:
-            print("Syntax error at '%s'" % p.value)
+            print(("Syntax error at '%s'" % p.value))
         else:
             print("Syntax error at EOF")
         raise SyntaxError
@@ -794,11 +794,11 @@ parser = yacc.yacc(optimize=1)
 if __name__ == '__main__':
     while True:
         try:
-            s = raw_input('JuniperNetscreen > ')
+            s = input('JuniperNetscreen > ')
         except EOFError:
             break
         if not s: continue
-        print s
+        print(s)
         result = parser.parse(s + '\n')
-        print result
+        print(result)
 

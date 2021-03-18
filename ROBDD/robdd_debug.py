@@ -32,7 +32,7 @@ def debug_robdd(robdd):
     plt.clf()
     pos = nx.graphviz_layout(g, prog='dot')
     if len(g.edges()) > 0:
-        edges, colors = zip(*nx.get_edge_attributes(g, 'color').items())
+        edges, colors = list(zip(*list(nx.get_edge_attributes(g, 'color').items())))
         nx.draw(g, pos, edgelist=edges,edge_color=colors, arrows=False)
     else:
         nx.draw(g, pos, arrows=False)

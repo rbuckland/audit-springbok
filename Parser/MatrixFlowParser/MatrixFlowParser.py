@@ -3,8 +3,8 @@
 
 import Parser.MatrixFlowParser.MatrixFlowYacc as matrix_flow_parser
 from Parser.MatrixFlowParser.MatrixFlowLex import lexer
-import Gtk.Gtk_QueryPath
-import Gtk.Gtk_Main
+import SpringbokUI.Gtk_QueryPath
+import SpringbokUI.Gtk_Main
 from ROBDD.synthesis import synthesize
 from ROBDD.synthesis import Bdd
 
@@ -48,7 +48,7 @@ class MatrixFlowParser:
         fd.close()
         self.flow_list = matrix_flow_parser.get_query()
         for rule in self.flow_list:
-            print rule.to_string()
+            print(rule.to_string())
         return None
 
 
@@ -62,23 +62,23 @@ class MatrixFlowParser:
         """
         res = {}
 
-        Gtk.Gtk_Main.Gtk_Main().create_progress_bar("Matrix Flow import", len(self.flow_list))
+        SpringbokUI.Gtk_Main.Gtk_Main().create_progress_bar("Matrix Flow import", len(self.flow_list))
 
         for req in self.flow_list:
             for fw in firewalls_list:
                 for acl in fw.acl:
                     for rule in acl.rules:
                         if is_subset(rule, req) == True :#and req.action.to_string() != rule.action.to_string():
-                            if res.has_key(req.name):
+                            if req.name in res:
                                 res[req.name].append((rule, fw))
                             else:
                                 res[req.name] = []
                                 res[req.name].append((rule, fw))
 
-        for k, v in res.iteritems():
-            print k, v
+        for k, v in res.items():
+            print(k, v)
 
-        Gtk.Gtk_Main.Gtk_Main().destroy_progress_bar()
+        SpringbokUI.Gtk_Main.Gtk_Main().destroy_progress_bar()
         self.result = dict(res)
         return res
 

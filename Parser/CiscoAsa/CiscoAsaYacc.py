@@ -31,7 +31,7 @@ from SpringBase.Action import Action
 from SpringBase.Route import Route
 from SpringBase.Nat_Rule import Nat_Rule
 import NetworkGraph
-import CiscoAsaPort
+from . import CiscoAsaPort
 import re
 import ntpath
 import socket
@@ -102,10 +102,10 @@ def finish():
     for acl in p_info['firewall'].acl:
         for rule in p_info['rule_list']:
             if rule.name == acl.name:
-                for i in xrange(0, len(rule.ip_source)):
+                for i in range(0, len(rule.ip_source)):
                     if rule.ip_source[i] == 'INTERFACE':
                         rule.ip_source[i] = Operator('EQ', NetworkGraph.NetworkGraph.NetworkGraph().get_interface_ip(acl))
-                for i in xrange(0, len(rule.ip_dest)):
+                for i in range(0, len(rule.ip_dest)):
                     if rule.ip_dest[i] == 'INTERFACE':
                         rule.ip_dest[i] = Operator('EQ', NetworkGraph.NetworkGraph.NetworkGraph().get_interface_ip(acl))
                 acl.rules.append(rule)
@@ -129,24 +129,24 @@ def finish():
 
     global nats, globs
     make_nat_list()
-    print 'ip_sec', p_info['firewall'].ipsec_maps
+    print('ip_sec', p_info['firewall'].ipsec_maps)
     maps = p_info['firewall'].ipsec_maps
-    for k, v in maps.iteritems():
-        print 'k', k, 'v', v
-        for k1, v1 in v.iteritems():
+    for k, v in maps.items():
+        print('k', k, 'v', v)
+        for k1, v1 in v.items():
             if k1 != 'iface':
-                print "haha", k1, v1
-                if 'acl' in v1.keys():
+                print("haha", k1, v1)
+                if 'acl' in list(v1.keys()):
                     v1['acl'] = get_acl_by_name_2(p_info['firewall'], v1['acl'])
-    print maps
+    print(maps)
     #print p_info['firewall'].unbounded_rules
     #print [rule.name for rule in p_info['firewall'].acl[0].rules]
 
 
 def make_nat_list():
     global globs, nats
-    for id, values in globs.iteritems():
-        if id in nats.keys():
+    for id, values in globs.items():
+        if id in list(nats.keys()):
             rule = Nat_Rule(None, id, [], nats[id]['src'], [], [], [], globs[id]['dst'], [],
                             'src', globs[id]['iface'], nats[id]['iface'])
             p_info['firewall'].nat_rule_list.append(rule)
@@ -156,26 +156,26 @@ def get_firewall():
 
 
 def show():
-    print "--------- Object ---------"
-    for k, v in object_dict.items():
-        print '%s :' % k
+    print("--------- Object ---------")
+    for k, v in list(object_dict.items()):
+        print('%s :' % k)
         for elem in v:
-            for k1, v1 in elem.items():
-                print '\t%s %s' % (k1, v1)
-    print "--------- Firewall ---------"
-    print "%s" % p_info['firewall'].to_string()
+            for k1, v1 in list(elem.items()):
+                print('\t%s %s' % (k1, v1))
+    print("--------- Firewall ---------")
+    print("%s" % p_info['firewall'].to_string())
 
 
 def resolve(name, src_dest=None):
     if name not in object_dict:
-        print 'Critical: %s not found in dictionary' % name
+        print('Critical: %s not found in dictionary' % name)
         raise SyntaxError
 
     p_info['used_object'].add(name)
     values = object_dict[name]
 
     for elem in values:
-        for k1, v1 in elem.items():
+        for k1, v1 in list(elem.items()):
             if k1 == 'object':
                 resolve(v1, src_dest)
             if k1 == 'network':
@@ -900,7 +900,7 @@ nats = {}
 def p_nat_rule_outside(p):
     '''nat_rule_line : GLOBAL LPAREN WORD RPAREN NUMBER IP_ADDR'''
     global nats, globs
-    if p[5] not in globs.keys():
+    if p[5] not in list(globs.keys()):
         globs[p[5]] = {}
         globs[p[5]]['iface'] = []
         iface = p_info['firewall'].get_interface_by_nameif(p[3])
@@ -925,7 +925,7 @@ def p_nat_rule_outside2(p):
 def p_nat_rule_inside(p):
     '''nat_rule_line : NAT LPAREN WORD RPAREN NUMBER IP_ADDR IP_ADDR'''
     global nats, globs
-    if p[5] not in nats.keys():
+    if p[5] not in list(nats.keys()):
         nats[p[5]] = {}
         nats[p[5]]['iface'] = []
         iface = p_info['firewall'].get_interface_by_name(p[3])
@@ -979,7 +979,7 @@ def get_acl_by_name_2(firewall, acl_name):
     if acl == None:
         acl = ACL(acl_name)
         for rule in firewall.unbounded_rules:
-            print rule.name, acl_name
+            print(rule.name, acl_name)
         acl.rules = [rule for rule in firewall.unbounded_rules if rule.name == acl_name]
         acl.firewall = firewall
         return acl
@@ -990,21 +990,21 @@ def p_ipsec_acl(p):
     '''map_attr_line : CRYPTO MAP WORD NUMBER MATCH ADDRESS WORD
                      | CRYPTO MAP WORD NUMBER MATCH ADDRESS NUMBER
     '''
-    print '1'
+    print('1')
     maps = p_info['firewall'].ipsec_maps
-    if p[3] in maps.keys():
-        print '2'
-        if p[4] in maps[p[3]].keys():
-            print '3'
+    if p[3] in list(maps.keys()):
+        print('2')
+        if p[4] in list(maps[p[3]].keys()):
+            print('3')
             maps[p[3]][p[4]]['acl'] = p[7]#get_acl_by_name_2(p_info['firewall'], (p[7]))
-            print 'klkfnleknf', maps[p[3]][p[4]]['acl'].rules
+            print('klkfnleknf', maps[p[3]][p[4]]['acl'].rules)
         else:
             maps[p[3]][p[4]] = {}
             maps[p[3]][p[4]]['acl'] = p[7]#get_acl_by_name_2(p_info['firewall'], (p[7]))
-            print 'klkfnleknf', maps[p[3]][p[4]]['acl'].rules
+            print('klkfnleknf', maps[p[3]][p[4]]['acl'].rules)
     else:
         maps[p[3]] = {}
-        if p[4] in maps[p[3]].keys():
+        if p[4] in list(maps[p[3]].keys()):
             maps[p[3]][p[4]]['acl'] = p[7]#get_acl_by_name_2(p_info['firewall'], (p[7]))
         else:
             maps[p[3]][p[4]] = {}
@@ -1014,15 +1014,15 @@ def p_ipsec_peer(p):
     '''map_attr_line : CRYPTO MAP WORD NUMBER SET PEER IP_ADDR
     '''
     maps = p_info['firewall'].ipsec_maps
-    if p[3] in maps.keys():
-        if p[4] in maps[p[3]].keys():
+    if p[3] in list(maps.keys()):
+        if p[4] in list(maps[p[3]].keys()):
             maps[p[3]][p[4]]['peer_dst'] = Ip(p[7])
         else:
             maps[p[3]][p[4]] = {}
             maps[p[3]][p[4]]['peer_dst'] = Ip(p[7])
     else:
         maps[p[3]] = {}
-        if p[4] in maps[p[3]].keys():
+        if p[4] in list(maps[p[3]].keys()):
             maps[p[3]][p[4]]['peer_dst'] = Ip(p[7])
         else:
             maps[p[3]][p[4]] = {}
@@ -1034,7 +1034,7 @@ def p_ipsec_iface(p):
     '''map_attr_line : CRYPTO MAP WORD INTERFACE WORD
     '''
     maps = p_info['firewall'].ipsec_maps
-    if p[3] in maps.keys():
+    if p[3] in list(maps.keys()):
         maps[p[3]]['iface'] = p_info['firewall'].get_interface_by_name(p[5])
     else:
         maps[p[3]] = {}
@@ -1045,7 +1045,7 @@ def p_ipsec_iface(p):
 def p_error(p):
     if p_info['raise_on_error']:
         if p:
-            print("Syntax error at '%s'" % p.value)
+            print(("Syntax error at '%s'" % p.value))
         else:
             print("Syntax error at EOF")
         raise SyntaxError
@@ -1056,7 +1056,7 @@ parser = yacc.yacc(optimize=1)
 if __name__ == '__main__':
     while True:
         try:
-            s = raw_input('CiscoAsa > ')
+            s = input('CiscoAsa > ')
         except EOFError:
             break
         if not s: continue

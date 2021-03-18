@@ -1,15 +1,15 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-from reportlab.graphics.widgetbase import Face
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 
-pygtk.require("2.0")
-import gtk
-import Gtk_Main
-from Gtk_DialogBox import Gtk_DialogBox
-from Gtk_TreeView import Gtk_TreeView
-import Gtk_Export
+from reportlab.graphics.widgetbase import Face
+from . import Gtk_Main
+from .Gtk_DialogBox import Gtk_DialogBox
+from .Gtk_TreeView import Gtk_TreeView
+from . import Gtk_Export
 import itertools
 from NetworkGraph import NetworkGraph
 from SpringBase import *
@@ -30,67 +30,67 @@ class Gtk_QueryPath:
     dest_entry : Ip. Predefined ip destination
     """
     def __init__(self, source_entry=None, dest_entry=None):
-        self.popup = gtk.Window()
+        self.popup = Gtk.Window()
         self.popup.set_title("Query Path")
         self.popup.set_modal(True)
         self.popup.set_transient_for(Gtk_Main.Gtk_Main().window)
 
-        self.popup.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        self.popup.set_type_hint(Gdk.WindowTypeHint.DIALOG)
 
-        vbox = gtk.VBox()
-        vbox.pack_start(gtk.Label("Query Path :"))
+        vbox = Gtk.VBox()
+        vbox.pack_start(Gtk.Label("Query Path :", True, True, 0))
 
-        self.protocol_label = gtk.Label("Protocol :")
-        self.protocol_entry = gtk.Entry()
-        vbox.pack_start(self.protocol_label)
-        vbox.pack_start(self.protocol_entry)
+        self.protocol_label = Gtk.Label(label="Protocol :")
+        self.protocol_entry = Gtk.Entry()
+        vbox.pack_start(self.protocol_label, True, True, 0)
+        vbox.pack_start(self.protocol_entry, True, True, 0)
 
-        self.ip_source_label = gtk.Label("IP source :")
-        self.ip_source_entry = gtk.Entry()
-        vbox.pack_start(self.ip_source_label)
-        vbox.pack_start(self.ip_source_entry)
+        self.ip_source_label = Gtk.Label(label="IP source :")
+        self.ip_source_entry = Gtk.Entry()
+        vbox.pack_start(self.ip_source_label, True, True, 0)
+        vbox.pack_start(self.ip_source_entry, True, True, 0)
 
-        self.mask_source_label = gtk.Label("Mask source :")
-        self.mask_source_entry = gtk.Entry()
-        vbox.pack_start(self.mask_source_label)
-        vbox.pack_start(self.mask_source_entry)
+        self.mask_source_label = Gtk.Label(label="Mask source :")
+        self.mask_source_entry = Gtk.Entry()
+        vbox.pack_start(self.mask_source_label, True, True, 0)
+        vbox.pack_start(self.mask_source_entry, True, True, 0)
 
         if source_entry is not None:
             self.ip_source_entry.set_text(Ip.Ip.toString(source_entry.ip))
             self.mask_source_entry.set_text(Ip.Ip.toString(source_entry.mask))
 
-        self.port_source_label = gtk.Label("Port source :")
-        self.port_source_entry = gtk.Entry()
-        vbox.pack_start(self.port_source_label)
-        vbox.pack_start(self.port_source_entry)
+        self.port_source_label = Gtk.Label(label="Port source :")
+        self.port_source_entry = Gtk.Entry()
+        vbox.pack_start(self.port_source_label, True, True, 0)
+        vbox.pack_start(self.port_source_entry, True, True, 0)
 
-        self.ip_dest_label = gtk.Label("IP destination :")
-        self.ip_dest_entry = gtk.Entry()
-        vbox.pack_start(self.ip_dest_label)
-        vbox.pack_start(self.ip_dest_entry)
+        self.ip_dest_label = Gtk.Label(label="IP destination :")
+        self.ip_dest_entry = Gtk.Entry()
+        vbox.pack_start(self.ip_dest_label, True, True, 0)
+        vbox.pack_start(self.ip_dest_entry, True, True, 0)
 
-        self.mask_dest_label = gtk.Label("Mask destination :")
-        self.mask_dest_entry = gtk.Entry()
-        vbox.pack_start(self.mask_dest_label)
-        vbox.pack_start(self.mask_dest_entry)
+        self.mask_dest_label = Gtk.Label(label="Mask destination :")
+        self.mask_dest_entry = Gtk.Entry()
+        vbox.pack_start(self.mask_dest_label, True, True, 0)
+        vbox.pack_start(self.mask_dest_entry, True, True, 0)
 
         if dest_entry is not None:
             self.ip_dest_entry.set_text(Ip.Ip.toString(dest_entry.ip))
             self.mask_dest_entry.set_text(Ip.Ip.toString(dest_entry.mask))
 
-        self.port_dest_label = gtk.Label("Port destination :")
-        self.port_dest_entry = gtk.Entry()
-        vbox.pack_start(self.port_dest_label)
-        vbox.pack_start(self.port_dest_entry)
+        self.port_dest_label = Gtk.Label(label="Port destination :")
+        self.port_dest_entry = Gtk.Entry()
+        vbox.pack_start(self.port_dest_label, True, True, 0)
+        vbox.pack_start(self.port_dest_entry, True, True, 0)
 
-        self.button_cancel = gtk.Button("Cancel")
+        self.button_cancel = Gtk.Button("Cancel")
         self.button_cancel.connect("clicked", lambda x: self.popup.destroy())
-        self.button_start = gtk.Button("Run Query")
+        self.button_start = Gtk.Button("Run Query")
         self.button_start.connect("clicked", self.on_click)
-        self.hbox = gtk.HBox()
-        self.hbox.pack_start(self.button_cancel)
-        self.hbox.pack_start(self.button_start)
-        vbox.pack_start(self.hbox)
+        self.hbox = Gtk.HBox()
+        self.hbox.pack_start(self.button_cancel, True, True, 0)
+        self.hbox.pack_start(self.button_start, True, True, 0)
+        vbox.pack_start(self.hbox, True, True, 0)
 
         self.popup.add(vbox)
         self.popup.show_all()
@@ -300,8 +300,8 @@ def run_query(rule, ip_source=None, ip_dest=None):
 
     simple_path = g.get_all_simple_path(ip_source, ip_dest)
     end = time.time()
-    print 'temps mis = ', str(end - start)
-    print 'simple len', len(simple_path)
+    print('temps mis = ', str(end - start))
+    print('simple len', len(simple_path))
 
 
     for node in g.graph.nodes(data=True):
@@ -361,8 +361,8 @@ def run_query(rule, ip_source=None, ip_dest=None):
             # duplicate rule_list depending on the number of acl found in acl_list
             # this mean that if we found to acl who match the query between path[i] and path[i + 1],
             # we duplicate the rule_list to have all acl and rules possible
-            rule_list += [list(l) for l in rule_list for _ in xrange(len(acl_list) - 1)]
-            [rule_list[j].append(acl_list[j * len(acl_list) / len(rule_list)]) for j in xrange(len(rule_list))]
+            rule_list += [list(l) for l in rule_list for _ in range(len(acl_list) - 1)]
+            [rule_list[j].append(acl_list[j * len(acl_list) / len(rule_list)]) for j in range(len(rule_list))]
             i += 1
 
         if i == len(path) - 1:
@@ -421,7 +421,7 @@ def get_routed_paths(res, ip_dest):
             for a in res:
                 if a[0] == path:
                     finalRes.remove(a)
-    print 'final', len(finalRes), finalRes
+    print('final', len(finalRes), finalRes)
     return list(finalRes)
 
 

@@ -3,7 +3,7 @@
 
 """Parser : Parse interface for firewall construction"""
 
-import gtk
+from gi.repository import Gtk
 import time
 import re
 import os
@@ -32,7 +32,7 @@ def parser(file_name, yacc_parser, progressBar):
     try:
         fd = open(file_name, 'r')
     except:
-        print 'Error while opening the configuration file'
+        print('Error while opening the configuration file')
         return None
 
     # file length
@@ -54,18 +54,18 @@ def parser(file_name, yacc_parser, progressBar):
         try:
             _parse_kit.parser.parse(line, _parse_kit.lexer, debug=0)
         except:
-            print 'Error while parsing line: %s' % line, ctr
+            print('Error while parsing line: %s' % line, ctr)
             #raise SyntaxError
         count += 1
         if progressBar and count % (max(1, len / 100)) == 0:
             progressBar.set_fraction(1. * count / len)
-            while gtk.events_pending():
-                gtk.main_iteration_do(False)
+            while Gtk.events_pending():
+                Gtk.main_iteration_do(False)
 
     _parse_kit.finish()
     fd.close()
 
-    print time.time() - t0
+    print(time.time() - t0)
 
     return _parse_kit.get_firewall()
 
@@ -98,12 +98,12 @@ def suppose_type(fname):
         try:
             p.init(fname, True)
         except AttributeError:
-            print "error : 'module' object has no attribute 'init'"
+            print("error : 'module' object has no attribute 'init'")
 
     with open(fname) as f:
         for i, l in enumerate(f):
             # test if line start with one proposed by parsers
-            for j in xrange(len(parser_list)):
+            for j in range(len(parser_list)):
                 for pattern in parser_list[j][2]:
                     if re.match(pattern, l.lstrip()):
                         try:

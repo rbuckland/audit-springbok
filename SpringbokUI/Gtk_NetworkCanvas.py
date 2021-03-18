@@ -1,17 +1,21 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-from Gtk import Gtk_HelpMessage
 
-pygtk.require("2.0")
-import gtk
-from Gtk_NetworkPopupMenu import Gtk_NewtworkPopupMenu
-from Gtk_DialogBox import Gtk_DialogBox
-from Gtk_HelpMessage import Gtk_Message
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GLib
+
+from SpringbokUI import Gtk_HelpMessage
+
+from .Gtk_NetworkPopupMenu import Gtk_NewtworkPopupMenu
+from .Gtk_DialogBox import Gtk_DialogBox
+from .Gtk_HelpMessage import Gtk_Message
 from NetworkGraph import NetworkGraph
-import Gtk_Main
-from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas
+from . import Gtk_Main
+from matplotlib.backends.backend_gtk3agg import FigureCanvasGTK3Agg as FigureCanvas
 import matplotlib.pyplot as plt
 from matplotlib.cbook import get_sample_data
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
@@ -44,27 +48,27 @@ class Gtk_NetworkCanvas:
         plt.subplots_adjust(left=0., right=1., bottom=0., top=1., wspace=0.2, hspace=0.2)
         self.canvas = FigureCanvas(fig)
         self.canvas.add_events(
-            gtk.gdk.EXPOSURE_MASK | gtk.gdk.LEAVE_NOTIFY_MASK | gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.POINTER_MOTION_MASK | gtk.gdk.POINTER_MOTION_HINT_MASK | gtk.gdk.BUTTON_RELEASE_MASK)
+            Gdk.EventMask.EXPOSURE_MASK | Gdk.EventMask.LEAVE_NOTIFY_MASK | Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.POINTER_MOTION_HINT_MASK | Gdk.EventMask.BUTTON_RELEASE_MASK)
         self.canvas.connect("motion_notify_event", self.on_motion)
         self.canvas.connect("button-press-event", self.on_click)
         self.canvas.connect("button-release-event", self.on_release)
         self.canvas.connect("scroll-event", self.on_scroll)
         self.canvas.connect("leave-notify-event", self.on_lose_focus)
 
-        self.adjustement = gtk.Adjustment(0.0, 0.0, 100.0, 1.0, 1.0, 1.0)
+        self.adjustement = Gtk.Adjustment(0.0, 0.0, 100.0, 1.0, 1.0, 1.0)
         self.adjustement_signal = self.adjustement.connect("value-changed", self.on_zoom_changed)
-        self.zoom_scale = gtk.HScale(self.adjustement)
+        self.zoom_scale = Gtk.HScale() # self.adjustement
         self.zoom_scale.set_draw_value(False)
         self.zoom_value = 0.0
 
-        self.redraw = gtk.Button("Redraw")
+        self.redraw = Gtk.Button("Redraw")
         self.redraw.connect("clicked", self.on_redraw)
 
-        self.hbox = gtk.HBox()
+        self.hbox = Gtk.HBox()
         self.hbox.pack_start(self.zoom_scale, True, True, 0)
         self.hbox.pack_end(self.redraw, False, False, 0)
 
-        self.vbox = gtk.VBox()
+        self.vbox = Gtk.VBox()
         self.vbox.pack_start(self.canvas, True, True, 0)
         self.vbox.pack_end(self.hbox, False, False, 0)
 
@@ -95,20 +99,20 @@ class Gtk_NetworkCanvas:
         - on interface, show interface menu
         - else show canvas menu
         """
-        if event.button == 1 and event.type == gtk.gdk._2BUTTON_PRESS:
+        if event.button == 1 and event.type == Gdk._2BUTTON_PRESS:
             dbl_click = False
             dbl_click |= self.on_dblclick_edge()
             dbl_click |= self.on_dblclick_node()
             if not dbl_click:
                 Gtk_Main.Gtk_Main().lateral_pane.help_message.change_message(Gtk_Message.TOPOLOGY_MESSAGE)
-        if event.button == 3 and event.type == gtk.gdk.BUTTON_PRESS:
+        if event.button == 3 and event.type == Gdk.EventType.BUTTON_PRESS:
             right_click = False
             right_click |= self.on_right_click_edge(event)
             right_click |= self.on_right_click_node(event)
             if not right_click:
                 Gtk_Main.Gtk_Main().lateral_pane.help_message.change_message(Gtk_Message.ON_BACKGROUND_CLICK)
                 self.popup.popup_clear(event)
-        if event.button == 1 and event.type == gtk.gdk.BUTTON_PRESS:
+        if event.button == 1 and event.type == Gdk.EventType.BUTTON_PRESS:
             left_click = False
             left_click |= self.on_left_click_edge()
             left_click |= self.on_left_click_node()
@@ -153,7 +157,7 @@ class Gtk_NetworkCanvas:
     def on_dblclick_node(self):
         """Event listener, on double click node, if firewall show conf file else add note"""
         g = NetworkGraph.NetworkGraph()
-        for k, v in g.graph.node.items():
+        for k, v in list(g.graph.node.items()):
             if v['object'].gtk_press and isinstance(v['object'].object, Firewall):
                 Gtk_Main.Gtk_Main().notebook.add_conf_tab(v['object'].object.name, v['object'].object.hostname)
                 return True
@@ -177,7 +181,7 @@ class Gtk_NetworkCanvas:
     def on_right_click_node(self, event):
         """Event listener, on right click node, show popup menu for node"""
         g = NetworkGraph.NetworkGraph()
-        for k, v in g.graph.node.items():
+        for k, v in list(g.graph.node.items()):
             if v['object'].gtk_press:
                 self.popup.popup(None, event, v['object'])
                 v['object'].gtk_press = False
@@ -186,7 +190,7 @@ class Gtk_NetworkCanvas:
     def on_left_click_node(self):
         """Show node details"""
         g = NetworkGraph.NetworkGraph()
-        for k, v in g.graph.node.items():
+        for k, v in list(g.graph.node.items()):
             if v['object'].gtk_press:
                 Gtk_Main.Gtk_Main().lateral_pane.help_message.change_message(Gtk_Message.ON_CLICK_NODE)
                 Gtk_Main.Gtk_Main().lateral_pane.details.clear()
@@ -194,7 +198,7 @@ class Gtk_NetworkCanvas:
                 if isinstance(tmp_intf, Interface):
                     for e in sorted(tmp_intf, key=lambda tmp_intf: tmp_intf.nameif):
                         message = "%s:\n- %s\n- %s" % (e.nameif, e.name, e.network.to_string())
-                        for key, value in e.attributes.items():
+                        for key, value in list(e.attributes.items()):
                             message += "\n- %s : %s" % (key, value)
                         Gtk_Main.Gtk_Main().lateral_pane.details.add_row(message)
                         Gtk_Main.Gtk_Main().lateral_pane.focus_details()
@@ -205,11 +209,11 @@ class Gtk_NetworkCanvas:
                     treeview_routes = Gtk_Main.Gtk_Main().lateral_pane.routes_tab_treeview
                     scrolled_window = lateral_pane.routes_tab_treeview.scrolled_window
                     data = v['object'].object.data
-                    notebook_routes.notebook.set_tab_label(scrolled_window, gtk.Label(
+                    notebook_routes.notebook.set_tab_label(scrolled_window, Gtk.Label(label=
                             'Networks reached by ' + v['object'].object.iface.nameif))
                     treeview_routes.clear()
 
-                    for gateway, networks in data.iteritems():
+                    for gateway, networks in data.items():
                         parent = treeview_routes.add_row(None, gateway, foreground='black', background='grey')
                         for network in networks:
                             treeview_routes.add_row(parent, network)
@@ -255,7 +259,7 @@ class Gtk_NetworkCanvas:
         if self.bRefresh:
             self.bRefresh = False
             self.canvas.draw()
-            gtk.timeout_add(30, self.refresh)
+            GLib.timeout_add_seconds(30, self.refresh)
 
     def on_release(self, widget, event):
         """Event listener : release"""

@@ -1,20 +1,23 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-pygtk.require("2.0")
-from Gtk.Gtk_HelpMessage import Gtk_Message
-import gtk
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+
+from functools import reduce
+from SpringbokUI.Gtk_HelpMessage import Gtk_Message
+
 import csv
 import collections
 import threading
-import Gtk_Main
+from . import Gtk_Main
 from Parser import Parser
-from Gtk_QueryPath import Gtk_QueryPath
-from Gtk_ListView import Gtk_ListView
-from Gtk_TreeView import Gtk_TreeView
-from Gtk_DialogBox import Gtk_DialogBox
-import Gtk_Export
+from .Gtk_QueryPath import Gtk_QueryPath
+from .Gtk_ListView import Gtk_ListView
+from .Gtk_TreeView import Gtk_TreeView
+from .Gtk_DialogBox import Gtk_DialogBox
+from . import Gtk_Export
 from SpringBase import Rule
 from SpringBase import Ip
 from SpringBase import Firewall
@@ -41,7 +44,7 @@ class Gtk_NewtworkPopupMenu:
     """
     def __init__(self):
         self.object = None
-        self.menu = gtk.Menu()
+        self.menu = Gtk.Menu()
         self.node = None
         self.menu.connect("focus-out-event", lambda x: self.menu.popdown())
 
@@ -54,95 +57,95 @@ class Gtk_NewtworkPopupMenu:
         """
         self.node = node
         self.object = object
-        map(self.menu.remove, self.menu.get_children())
+        list(map(self.menu.remove, self.menu.get_children()))
 
         # Show conf #
         if isinstance(self.node.object, Firewall.Firewall):
-            self.show_conf = gtk.MenuItem("Show configuration")
+            self.show_conf = Gtk.MenuItem("Show configuration")
             self.menu.append(self.show_conf)
             self.show_conf.connect("activate", self.on_show_conf)
 
         # Add Note #
         if isinstance(self.node.object, Firewall.Firewall) or isinstance(self.node.object, Ip.Ip):
-            self.add_note = gtk.MenuItem("Add note")
+            self.add_note = Gtk.MenuItem("Add note")
             self.menu.append(self.add_note)
             self.add_note.connect("activate", self.on_add_note)
 
         # Anomaly detection #
         if isinstance(self.node.object, Firewall.Firewall):
-            self.anomaly_menu = gtk.MenuItem("Detect anomaly")
+            self.anomaly_menu = Gtk.MenuItem("Detect anomaly")
             self.menu.append(self.anomaly_menu)
             self.anomaly_menu.connect("activate", self.on_anomaly_menu)
 
         # Configuration error #
         if isinstance(self.node.object, Firewall.Firewall):
-            self.config_error_menu = gtk.MenuItem("Configuration error")
+            self.config_error_menu = Gtk.MenuItem("Configuration error")
             self.menu.append(self.config_error_menu)
             self.config_error_menu.connect("activate", self.on_config_error_menu)
 
         # Object list #
         if isinstance(self.node.object, Firewall.Firewall):
-            self.object_menu = gtk.MenuItem("Object list")
+            self.object_menu = Gtk.MenuItem("Object list")
             self.menu.append(self.object_menu)
             self.object_menu.connect("activate", self.on_object_menu)
 
         # Service list #
         if isinstance(self.node.object, Firewall.Firewall):
-            self.service_menu = gtk.MenuItem("Service list")
+            self.service_menu = Gtk.MenuItem("Service list")
             self.menu.append(self.service_menu)
             self.service_menu.connect("activate", self.on_service_menu)
 
         # Export Interfaces #
         if isinstance(self.node.object, Firewall.Firewall):
-            self.export_itf_menu = gtk.MenuItem("Export interfaces list")
+            self.export_itf_menu = Gtk.MenuItem("Export interfaces list")
             self.menu.append(self.export_itf_menu)
             self.export_itf_menu.connect("activate", self.on_export_itf_list)
 
         # Error conf #
         if isinstance(self.node.object, Firewall.Firewall):
-            self.error_conf_menu = gtk.MenuItem("Generate anonymous configuration")
+            self.error_conf_menu = Gtk.MenuItem("Generate anonymous configuration")
             self.menu.append(self.error_conf_menu)
             self.error_conf_menu.connect("activate", self.on_error_conf)
 
         # Remove #
         if isinstance(self.node.object, Firewall.Firewall):
-            self.remove_menu = gtk.MenuItem("Remove")
+            self.remove_menu = Gtk.MenuItem("Remove")
             self.menu.append(self.remove_menu)
             self.remove_menu.connect("activate", self.on_remove_menu)
 
         # Show Nat rules #
         if isinstance(self.node.object, Firewall.Firewall):
-            self.show_nat_rule = gtk.MenuItem("Show nat rules")
+            self.show_nat_rule = Gtk.MenuItem("Show nat rules")
             self.menu.append(self.show_nat_rule)
             self.show_nat_rule.connect("activate", self.on_show_nat_rule)
 
         # Show IPSec Tunnels #
         if isinstance(self.node.object, Firewall.Firewall):
-            self.show_ipsec_tunnels = gtk.MenuItem("Show IPSec tunnels")
+            self.show_ipsec_tunnels = Gtk.MenuItem("Show IPSec tunnels")
             self.menu.append(self.show_ipsec_tunnels)
             self.show_ipsec_tunnels.connect("activate", self.on_show_ipsec_tunnels)
 
         # Add route config file #
         if isinstance(self.node.object, Firewall.Firewall):
-            self.add_route_config = gtk.MenuItem("add route config")
+            self.add_route_config = Gtk.MenuItem("add route config")
             self.menu.append(self.add_route_config)
             self.add_route_config.connect("activate", self.on_add_route_config)
 
         # Add interface config file #
         if isinstance(self.node.object, Firewall.Firewall):
-            self.add_interface_config = gtk.MenuItem("add interface config")
+            self.add_interface_config = Gtk.MenuItem("add interface config")
             self.menu.append(self.add_interface_config)
             self.add_interface_config.connect("activate", self.on_add_interface_config)
 
         # Itinerary #
         if isinstance(self.node.object, Ip.Ip):
-            self.itinerary_menu = gtk.Menu()
+            self.itinerary_menu = Gtk.Menu()
 
-            self.itinerary = gtk.MenuItem("Itinerary")
+            self.itinerary = Gtk.MenuItem("Itinerary")
             self.itinerary.set_submenu(self.itinerary_menu)
 
-            self.itinerary_from = gtk.MenuItem("Itinerary from this place")
-            self.itinerary_to = gtk.MenuItem("Itinerary to this place")
+            self.itinerary_from = Gtk.MenuItem("Itinerary from this place")
+            self.itinerary_to = Gtk.MenuItem("Itinerary to this place")
 
             self.itinerary_menu.append(self.itinerary_from)
             self.itinerary_menu.append(self.itinerary_to)
@@ -153,16 +156,16 @@ class Gtk_NewtworkPopupMenu:
 
         # Sensitivity #
         if isinstance(self.node.object, Ip.Ip):
-            self.sensitivity_menu = gtk.Menu()
+            self.sensitivity_menu = Gtk.Menu()
 
-            self.sensitivity = gtk.MenuItem("Sensitivity")
+            self.sensitivity = Gtk.MenuItem("Sensitivity")
             self.sensitivity.set_submenu(self.sensitivity_menu)
 
-            self.sensitivity_vhigh = gtk.MenuItem("Very high")
-            self.sensitivity_high = gtk.MenuItem("High")
-            self.sensitivity_normal = gtk.MenuItem("Normal")
-            self.sensitivity_low = gtk.MenuItem("Low")
-            self.sensitivity_vlow = gtk.MenuItem("Very low")
+            self.sensitivity_vhigh = Gtk.MenuItem("Very high")
+            self.sensitivity_high = Gtk.MenuItem("High")
+            self.sensitivity_normal = Gtk.MenuItem("Normal")
+            self.sensitivity_low = Gtk.MenuItem("Low")
+            self.sensitivity_vlow = Gtk.MenuItem("Very low")
 
             self.sensitivity_menu.append(self.sensitivity_vhigh)
             self.sensitivity_menu.append(self.sensitivity_high)
@@ -192,15 +195,15 @@ class Gtk_NewtworkPopupMenu:
                 elif isinstance(y, Ip.Ip):
                     return y
                 return None
-            self.acl_menu = gtk.Menu()
-            self.acl = gtk.MenuItem("ACL")
+            self.acl_menu = Gtk.Menu()
+            self.acl = Gtk.MenuItem("ACL")
             self.acl.set_submenu(self.acl_menu)
             firewall = get_firewall(self.object[0], self.object[1])
             ip = get_ip(self.object[0], self.object[1])
             acl_list = NetworkGraph.NetworkGraph().get_acl_list(ip, None, firewall)
             acl_list += NetworkGraph.NetworkGraph().get_acl_list(None, ip, firewall)
             for acl in set(acl_list):
-                self.tmp_acl = gtk.MenuItem(acl.name)
+                self.tmp_acl = Gtk.MenuItem(acl.name)
                 self.acl_menu.append(self.tmp_acl)
                 self.tmp_acl.connect("activate", self.on_acl, acl)
             self.menu.append(self.acl)
@@ -219,25 +222,25 @@ class Gtk_NewtworkPopupMenu:
                 edge = elem[2]['object']
                 edge.clear_path()
 
-            for k, v in g.graph.node.items():
+            for k, v in list(g.graph.node.items()):
                 v['object'].clear_marker()
 
             Gtk_Main.Gtk_Main().lateral_pane.path.clear()
             Gtk_Main.Gtk_Main().lateral_pane.path_route.clear()
 
         def on_background_image(widget):
-            dialog = gtk.FileChooserDialog("Import firewall configuration",
+            dialog = Gtk.FileChooserDialog("Import firewall configuration",
                                            None,
-                                           gtk.FILE_CHOOSER_ACTION_OPEN,
-                                           (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                            gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-            dialog.set_default_response(gtk.RESPONSE_OK)
-            filter = gtk.FileFilter()
+                                           Gtk.FileChooserAction.OPEN,
+                                           (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                            Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+            dialog.set_default_response(Gtk.ResponseType.OK)
+            filter = Gtk.FileFilter()
             filter.set_name("PNG images")
             filter.add_pattern("*.png")
             dialog.add_filter(filter)
             response = dialog.run()
-            if response == gtk.RESPONSE_OK:
+            if response == Gtk.ResponseType.OK:
                 filename = dialog.get_filename()
                 Gtk_Main.Gtk_Main().networkcanvas.background_image(filename)
             dialog.destroy()
@@ -261,20 +264,20 @@ class Gtk_NewtworkPopupMenu:
 
             Gtk_Main.Gtk_Main().draw()
 
-        map(self.menu.remove, self.menu.get_children())
+        list(map(self.menu.remove, self.menu.get_children()))
 
         # Clear #
-        self.clear = gtk.MenuItem("Clear query path")
+        self.clear = Gtk.MenuItem("Clear query path")
         self.menu.append(self.clear)
         self.clear.connect("activate", on_clear)
 
         # Background #
-        self.background = gtk.MenuItem("Background image")
+        self.background = Gtk.MenuItem("Background image")
         self.menu.append(self.background)
         self.background.connect("activate", on_background_image)
 
         # Remove all firewalls
-        self.remove_all = gtk.MenuItem('Remove all')
+        self.remove_all = Gtk.MenuItem('Remove all')
         self.menu.append(self.remove_all)
         self.remove_all.connect("activate", on_remove_all_menu)
 
@@ -288,23 +291,23 @@ class Gtk_NewtworkPopupMenu:
 
     def on_add_note(self, item):
         """Show a popup window to add on a firewall."""
-        entry = gtk.Entry()
-        button = gtk.Button("OK")
+        entry = Gtk.Entry()
+        button = Gtk.Button("OK")
 
-        popup = gtk.Window()
+        popup = Gtk.Window()
         popup.set_title("Add note")
 
         popup.set_modal(True)
         popup.set_transient_for(Gtk_Main.Gtk_Main().window)
-        popup.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        popup.set_type_hint(Gdk.WindowTypeHint.DIALOG)
 
-        vbox2 = gtk.VBox()
-        vbox2.pack_start(gtk.Label("Add a note for this node :"))
-        vbox2.pack_end(entry)
+        vbox2 = Gtk.VBox()
+        vbox2.pack_start(Gtk.Label("Add a note for this node :", True, True, 0))
+        vbox2.pack_end(entry, True, True, 0)
 
-        vbox = gtk.VBox()
-        vbox.pack_start(vbox2)
-        vbox.pack_end(button)
+        vbox = Gtk.VBox()
+        vbox.pack_start(vbox2, True, True, 0)
+        vbox.pack_end(button, True, True, 0)
         popup.add(vbox)
 
         popup.show_all()
@@ -331,25 +334,25 @@ class Gtk_NewtworkPopupMenu:
             Gtk_Main.Gtk_Main().lateral_pane.help_message.change_message(Gtk_Message.ON_INTERNAL_ANOMALY)
 
         Gtk_Main.Gtk_Main().lateral_pane.help_message.change_message(Gtk_Message.ON_DEEP_SEARCH)
-        check_button = gtk.CheckButton("Deep search")
-        cancel_button = gtk.Button("Cancel")
+        check_button = Gtk.CheckButton("Deep search")
+        cancel_button = Gtk.Button("Cancel")
         cancel_button.connect("clicked", lambda x: popup.destroy())
-        start_button = gtk.Button("Start")
+        start_button = Gtk.Button("Start")
         start_button.connect("clicked", lambda x: start_detection(popup, check_button.get_active()))
 
-        hbox = gtk.HBox()
-        hbox.pack_start(cancel_button)
-        hbox.pack_start(start_button)
+        hbox = Gtk.HBox()
+        hbox.pack_start(cancel_button, True, True, 0)
+        hbox.pack_start(start_button, True, True, 0)
 
-        vbox = gtk.VBox()
-        vbox.pack_start(check_button)
-        vbox.pack_start(hbox)
+        vbox = Gtk.VBox()
+        vbox.pack_start(check_button, True, True, 0)
+        vbox.pack_start(hbox, True, True, 0)
 
-        popup = gtk.Window()
+        popup = Gtk.Window()
         popup.set_title("Internal detection")
         popup.set_modal(True)
         popup.set_transient_for(Gtk_Main.Gtk_Main().window)
-        popup.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        popup.set_type_hint(Gdk.WindowTypeHint.DIALOG)
         popup.add(vbox)
         popup.show_all()
 
@@ -387,9 +390,9 @@ class Gtk_NewtworkPopupMenu:
 
         object_dictionary = Gtk_TreeView("Object list")
 
-        for k, v in od.items():
+        for k, v in list(od.items()):
             p_iter = object_dictionary.add_row(None, k, 'black', '#969696')
-            for k1, v1 in self.node.object.resolve(k).items():
+            for k1, v1 in list(self.node.object.resolve(k).items()):
                 p_iter2 = object_dictionary.add_row(p_iter, k1, 'black', '#B9B9B9')
                 count = 0
                 for e in v1:
@@ -435,7 +438,7 @@ class Gtk_NewtworkPopupMenu:
             while model.iter_n_children(iter) > 1:
                 model.remove(iter_child)
                 iter_child = model.iter_children(iter)
-            for k, v in od.items():
+            for k, v in list(od.items()):
                 name = Port.Port.get_service_name(k)
                 p_iter1 = model.append(iter, [name if name else k, 'black', '#B9B9B9'])
                 count = 0
@@ -452,7 +455,7 @@ class Gtk_NewtworkPopupMenu:
             treeview.handler_unblock(handler_id)
 
         Gtk_Main.Gtk_Main().create_progress_bar("Services", 3*2**6)
-        for j in xrange(0, 3):
+        for j in range(0, 3):
             if j == 0:
                 protocol = 'tcp'
                 p_proto = service_list.add_row(None, "TCP", 'black', '#737373')
@@ -462,7 +465,7 @@ class Gtk_NewtworkPopupMenu:
             else:
                 protocol = None
                 p_proto = service_list.add_row(None, "IP", 'black', '#737373')
-            for i in xrange(0, 2**16, 2**10):
+            for i in range(0, 2**16, 2**10):
                 Gtk_Main.Gtk_Main().update_interface()
                 Gtk_Main.Gtk_Main().update_progress_bar(1)
                 if self.node.object.get_services(i, i + 2**10 - 1, protocol):
@@ -483,15 +486,15 @@ class Gtk_NewtworkPopupMenu:
         """Launch parser and generate an anonymous configuration file with parsed token"""
         filename = None
 
-        dialog = gtk.FileChooserDialog('Save interfaces list',
+        dialog = Gtk.FileChooserDialog('Save interfaces list',
                                        None,
-                                       gtk.FILE_CHOOSER_ACTION_SAVE,
-                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                        gtk.STOCK_SAVE, gtk.RESPONSE_OK))
-        dialog.set_default_response(gtk.RESPONSE_OK)
+                                       Gtk.FileChooserAction.SAVE,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        dialog.set_default_response(Gtk.ResponseType.OK)
         response = dialog.run()
 
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             filename = dialog.get_filename()
 
         dialog.destroy()
@@ -506,7 +509,7 @@ class Gtk_NewtworkPopupMenu:
                 tmp_intf = [e[2]['object'].object for e in g.graph.edges(self.node.object, data=True)]
                 for e in sorted(tmp_intf, key=lambda tmp_intf: tmp_intf.nameif):
                     message = [e.nameif, e.name, e.network.to_string()]
-                    for key, value in e.attributes.items():
+                    for key, value in list(e.attributes.items()):
                         message.append("%s : %s" % (key, value))
                     spamwriter.writerow(message)
         except Exception as e:
@@ -518,15 +521,15 @@ class Gtk_NewtworkPopupMenu:
         """Launch parser and generate an anonymous configuration file with parsed token"""
         filename = None
 
-        dialog = gtk.FileChooserDialog('Save anonymous configuration file',
+        dialog = Gtk.FileChooserDialog('Save anonymous configuration file',
                                        None,
-                                       gtk.FILE_CHOOSER_ACTION_SAVE,
-                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                        gtk.STOCK_SAVE, gtk.RESPONSE_OK))
-        dialog.set_default_response(gtk.RESPONSE_OK)
+                                       Gtk.FileChooserAction.SAVE,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        dialog.set_default_response(Gtk.ResponseType.OK)
         response = dialog.run()
 
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             filename = dialog.get_filename()
 
         dialog.destroy()
@@ -648,16 +651,16 @@ class Gtk_NewtworkPopupMenu:
         """
         filename = [] if multiple_select else None
 
-        dialog = gtk.FileChooserDialog(name,
+        dialog = Gtk.FileChooserDialog(name,
                                        None,
-                                       gtk.FILE_CHOOSER_ACTION_OPEN,
-                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                        gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+                                       Gtk.FileChooserAction.OPEN,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
         dialog.set_select_multiple(multiple_select)
-        dialog.set_default_response(gtk.RESPONSE_OK)
+        dialog.set_default_response(Gtk.ResponseType.OK)
 
         response = dialog.run()
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             if multiple_select:
                 filename = dialog.get_filenames()
             else:

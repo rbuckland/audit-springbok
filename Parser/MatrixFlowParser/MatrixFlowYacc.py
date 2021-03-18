@@ -154,7 +154,7 @@ parser = yacc.yacc(optimize=1)
 if __name__ == '__main__':
     while True:
         try:
-            s = raw_input('QueryPath > ')
+            s = input('QueryPath > ')
         except EOFError:
             break
         if not s: continue

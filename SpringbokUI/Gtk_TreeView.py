@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-import Gtk_Main
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 
-pygtk.require("2.0")
-import gtk
+from . import Gtk_Main
 
 
 class Gtk_TreeView():
@@ -20,21 +20,21 @@ class Gtk_TreeView():
         name : string. The name of the column
         header_visible : bool (optional, default=False). If True the column header is visible
         """
-        self.treestore = gtk.TreeStore(str, str, str)
-        self.treeview = gtk.TreeView(self.treestore)
-        self.tvcolumn = gtk.TreeViewColumn(name)
+        self.treestore = Gtk.TreeStore(str, str, str)
+        self.treeview = Gtk.TreeView(self.treestore)
+        self.tvcolumn = Gtk.TreeViewColumn(name)
         self.treeview.append_column(self.tvcolumn)
         self.treeview.set_headers_visible(header_visible)
         self.treeview.connect("key-press-event", self.on_key_pressed)
         self.treeview.connect("row-activated", self.on_row_activated)
-        self.cell = gtk.CellRendererText()
+        self.cell = Gtk.CellRendererText()
         self.tvcolumn.pack_start(self.cell, True)
         self.tvcolumn.add_attribute(self.cell, 'text', 0)
         self.tvcolumn.add_attribute(self.cell, 'foreground', 1)
         self.tvcolumn.add_attribute(self.cell, 'background', 2)
 
-        self.scrolled_window = gtk.ScrolledWindow()
-        self.scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        self.scrolled_window = Gtk.ScrolledWindow()
+        self.scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         self.scrolled_window.add(self.treeview)
 
     def on_key_pressed(self, widget, event):
@@ -44,14 +44,14 @@ class Gtk_TreeView():
         tree_row = self.treeview.get_selection().get_selected()[1]
         if not tree_row:
             return
-        if event.keyval == gtk.keysyms.Left:
+        if event.keyval == Gdk.KEY_Left:
             current_row = self.treeview.get_model()[self.treeview.get_selection().get_selected()[1]]
             self.treeview.collapse_row(current_row.path)
             self.treeview.set_cursor(current_row.path)
             if current_row.parent:
                 self.treeview.collapse_row(current_row.parent.path)
                 self.treeview.set_cursor(current_row.parent.path)
-        elif event.keyval == gtk.keysyms.Right:
+        elif event.keyval == Gdk.KEY_Right:
             self.treeview.expand_to_path(self.treeview.get_model()[self.treeview.get_selection().get_selected()[1]].path)
 
     def on_row_activated(self, treeview, path, viewcolumn):

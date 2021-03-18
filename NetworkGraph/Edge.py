@@ -3,9 +3,10 @@
 
 import matplotlib.pyplot as plt
 import math
-import NetworkGraph
+from . import NetworkGraph
 from SpringBase.Interface import Interface
 from SpringBase.Route_info import Route_info
+from functools import reduce
 
 ######## Modification of the class by Maurice TCHAMGOUE N. on the 08-07-2015
 ###          * Adding some informations to link gateways with the correponding firewall

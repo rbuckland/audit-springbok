@@ -1,23 +1,24 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-pygtk.require("2.0")
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+
 import re
-import gtk
-import Gtk_Main
-import Gtk_Export
+from . import Gtk_Main
+from . import Gtk_Export
 import NetworkGraph.NetworkGraph
 import AnomalyDetection.AnomalyError as AnomalyError
-import Gtk_HelpMessage
-from Gtk_HelpMessage import Gtk_Message
-from Gtk_TabInterface import Gtk_TabInterface
-from Gtk_ListView import Gtk_ListView
-from Gtk_TreeView import Gtk_TreeView
-from Gtk_SearchBar import Gtk_SearchBar
-from Gtk.Gtk_Matrix_Table import Gtk_Matrix_Table
-from Gtk.Gtk_Nat_Rule import Gtk_Nat_Rule
-from Gtk_IPSec_Tunnels import Gtk_IPSec_Tunnels
+from . import Gtk_HelpMessage
+from .Gtk_HelpMessage import Gtk_Message
+from .Gtk_TabInterface import Gtk_TabInterface
+from .Gtk_ListView import Gtk_ListView
+from .Gtk_TreeView import Gtk_TreeView
+from .Gtk_SearchBar import Gtk_SearchBar
+from SpringbokUI.Gtk_Matrix_Table import Gtk_Matrix_Table
+from SpringbokUI.Gtk_Nat_Rule import Gtk_Nat_Rule
+from .Gtk_IPSec_Tunnels import Gtk_IPSec_Tunnels
 from Tools.ReduceRule import ReduceRule
 
 class Gtk_NoteBookSplit:
@@ -48,7 +49,7 @@ class Gtk_NoteBookSplit:
         self.notebook.notebook.connect("drag_end", self.on_drag_end)
         self.notebook_split.notebook.connect("drag_begin", self.on_drag_begin)
         self.notebook_split.notebook.connect("drag_end", self.on_drag_end)
-        self.hpaned = gtk.HPaned()
+        self.hpaned = Gtk.HPaned()
         self.hpaned.pack1(self.notebook.notebook, True, False)
         self.tab_dict = {}
         self.export_tab = {}
@@ -94,11 +95,11 @@ class Gtk_NoteBookSplit:
                 self.tab_dict[ref] = obj
             if export:
                 self.export_tab[ref] = export
-            hbox = gtk.HBox()
-            hbox.pack_start(gtk.Label(name), True, True, 0)
+            hbox = Gtk.HBox()
+            hbox.pack_start(Gtk.Label(name, True, True, 0), True, True, 0)
             # Add button closing the notebook page
             if can_close:
-                button = gtk.Button("X")
+                button = Gtk.Button("X")
                 button.set_size_request(22, 15)
                 button.connect("clicked", self.on_tab_close, obj)
                 hbox.pack_end(button, False, False, 0)
@@ -118,7 +119,7 @@ class Gtk_NoteBookSplit:
 
     def close_all_closable(self):
         """Close all table that can be close"""
-        for k, v in self.tab_dict.items():
+        for k, v in list(self.tab_dict.items()):
             if self.notebook.notebook.page_num(v) != -1:
                 self.notebook.notebook.remove_page(self.notebook.notebook.page_num(v))
             elif self.notebook_split.notebook.page_num(v) != -1:
@@ -140,7 +141,7 @@ class Gtk_NoteBookSplit:
         elif self.notebook_split.notebook.page_num(obj) != -1:
             self.notebook_split.notebook.remove_page(self.notebook_split.notebook.page_num(obj))
         self.pane_resize()
-        for k, v in self.tab_dict.items():
+        for k, v in list(self.tab_dict.items()):
             if v == obj:
                 self.tab_dict.pop(k)
                 if k in self.export_tab:
@@ -261,13 +262,13 @@ class Gtk_NoteBookSplit:
         with open(file_name, "r") as myfile:
             data = myfile.read()
 
-        text_view = gtk.TextView()
+        text_view = Gtk.TextView()
         text_view.set_editable(False)
         text_buffer = text_view.get_buffer()
         text_buffer.insert(text_buffer.get_end_iter(), data)
 
-        scrolled_window = gtk.ScrolledWindow()
-        scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scrolled_window.add_with_viewport(text_view)
         self.search_bar = Gtk_SearchBar(text_view, text_view, scrolled_window)
         self.add_tab(self.search_bar.vbox, fw_name, can_close=True, ref=file_name)
@@ -275,7 +276,7 @@ class Gtk_NoteBookSplit:
 
     def can_export(self):
         """Return True if the current tab can be exported, False otherwise"""
-        for k, v in self.tab_dict.items():
+        for k, v in list(self.tab_dict.items()):
             if v == self.notebook.notebook.get_nth_page(self.notebook.notebook.current_page()):
                 if k in self.export_tab:
                     return True
@@ -287,7 +288,7 @@ class Gtk_NoteBookSplit:
         Parameters
         ----------
         filename : string. The destination file"""
-        for k, v in self.tab_dict.items():
+        for k, v in list(self.tab_dict.items()):
             if v == self.notebook.notebook.get_nth_page(self.notebook.notebook.current_page()):
                 if k in self.export_tab:
                     Gtk_Export.Gtk_Export(filename, self.export_tab[k], k).save()
@@ -301,16 +302,16 @@ class Gtk_NoteBookSplit:
         with open(file_name, "r") as myfile:
             data = myfile.read()
 
-        text_view = gtk.TextView()
+        text_view = Gtk.TextView()
         text_view.set_editable(True)
         text_buffer = text_view.get_buffer()
         text_buffer.insert(text_buffer.get_end_iter(), data)
 
-        scrolled_window = gtk.ScrolledWindow()
-        scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scrolled_window.add_with_viewport(text_view)
         self.search_bar = Gtk_SearchBar(text_view, text_view, scrolled_window)
-        launch_button = gtk.Button('Launch matrix verification')
+        launch_button = Gtk.Button('Launch matrix verification')
         self.search_bar.vbox.add(launch_button)
         self.add_tab(self.search_bar.vbox, "Matrix flow", can_close=True, ref=file_name)
         Gtk_Main.Gtk_Main().lateral_pane.help_message.change_message\
@@ -342,10 +343,10 @@ class Gtk_NoteBook:
     tab_dict : dict. Dictionnary of existing interface page (used to prevent duplicate page)
     """
     def __init__(self, group_id=-1):
-        self.notebook = gtk.Notebook()
-        self.notebook.set_tab_pos(gtk.POS_TOP)
+        self.notebook = Gtk.Notebook()
+        self.notebook.set_tab_pos(Gtk.PositionType.TOP)
         self.notebook.set_scrollable(True)
-        self.notebook.set_group_id(group_id)
+        self.notebook.set_group_name(str(group_id))
 
     def do_connect(self):
         """Activate connection for 'switch-page' event"""
@@ -368,8 +369,8 @@ class Gtk_NoteBook:
         """
         gtk_label = label
         if isinstance(label, str):
-            gtk_label = gtk.Label(label)
+            gtk_label = Gtk.Label(label=label)
         self.notebook.append_page(obj, gtk_label)
-        self.notebook.child_set(obj, "tab-expand", expand)
+        self.notebook.child_set([ obj, "tab-expand", expand ])
         self.notebook.show_all()
         self.notebook.set_current_page(self.notebook.page_num(obj))

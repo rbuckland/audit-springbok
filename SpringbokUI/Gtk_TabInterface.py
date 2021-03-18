@@ -1,14 +1,16 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-import re
-from Gtk.Gtk_HelpMessage import Gtk_Message
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 
-pygtk.require("2.0")
-import gtk
-import gobject
-import Gtk_Main
+import re
+from SpringbokUI.Gtk_HelpMessage import Gtk_Message
+
+
+from gi.repository import GObject
+from . import Gtk_Main
 from SpringBase.Operator import Operator
 
 
@@ -25,32 +27,32 @@ class Gtk_TabInterface:
         object : object. An object instance (used for dictionary who prevent page duplication)
         """
         self.object = object
-        self.scrolled_window = gtk.ScrolledWindow()
-        self.scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self.model = gtk.ListStore(gobject.TYPE_INT,
-                                   gobject.TYPE_STRING,
-                                   gobject.TYPE_STRING,
-                                   gobject.TYPE_STRING,
-                                   gobject.TYPE_STRING,
-                                   gobject.TYPE_STRING,
-                                   gobject.TYPE_STRING,
-                                   gobject.TYPE_STRING,
-                                   gobject.TYPE_STRING,
-                                   gobject.TYPE_STRING)
-        self.model_sort = gtk.TreeModelSort(self.model)
-        # self.model_sort.set_sort_column_id(0, gtk.SORT_ASCENDING)
-        self.tree_view = gtk.TreeView(self.model_sort)
+        self.scrolled_window = Gtk.ScrolledWindow()
+        self.scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        self.model = Gtk.ListStore(GObject.TYPE_INT,
+                                   GObject.TYPE_STRING,
+                                   GObject.TYPE_STRING,
+                                   GObject.TYPE_STRING,
+                                   GObject.TYPE_STRING,
+                                   GObject.TYPE_STRING,
+                                   GObject.TYPE_STRING,
+                                   GObject.TYPE_STRING,
+                                   GObject.TYPE_STRING,
+                                   GObject.TYPE_STRING)
+        self.model_sort = Gtk.TreeModelSort(self.model)
+        # self.model_sort.set_sort_column_id(0, Gtk.SortType.ASCENDING)
+        self.tree_view = Gtk.TreeView(self.model_sort)
         self.add_column()
         self.scrolled_window.add(self.tree_view)
         self.row_reordered_signal = self.model_sort.connect("rows-reordered", self.on_reordered)
         self.tree_view.connect('cursor-changed', self.on_cursor_changed)
 
-        self.button = gtk.Button("X")
+        self.button = Gtk.Button("X")
         self.button.set_size_request(22, 15)
         self.button.connect("clicked", self.on_tab_close)
 
-        self.hbox = gtk.HBox()
-        self.hbox.pack_start(gtk.Label(name), True, True, 0)
+        self.hbox = Gtk.HBox()
+        self.hbox.pack_start(Gtk.Label(name, True, True, 0), True, True, 0)
         self.hbox.pack_end(self.button, False, False, 0)
         self.hbox.show_all()
 
@@ -150,35 +152,35 @@ class Gtk_TabInterface:
 
     def add_column(self):
         """Init column for the list view"""
-        cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn("ID", cell, text=0, foreground=8, background=9)
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("ID", cell, text=0, foreground=8, background=9)
         column.set_sort_column_id(0)
         self.tree_view.append_column(column)
-        cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn("Name", cell, text=1, foreground=8, background=9)
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Name", cell, text=1, foreground=8, background=9)
         column.set_sort_column_id(1)
         self.tree_view.append_column(column)
-        cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn("Protocol", cell, text=2, foreground=8, background=9)
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Protocol", cell, text=2, foreground=8, background=9)
         column.set_sort_column_id(2)
         self.tree_view.append_column(column)
-        cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn("Ip source", cell, text=3, foreground=8, background=9)
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Ip source", cell, text=3, foreground=8, background=9)
         column.set_sort_column_id(3)
         self.tree_view.append_column(column)
-        cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn("Port source", cell, text=4, foreground=8, background=9)
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Port source", cell, text=4, foreground=8, background=9)
         column.set_sort_column_id(4)
         self.tree_view.append_column(column)
-        cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn("Ip dest", cell, text=5, foreground=8, background=9)
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Ip dest", cell, text=5, foreground=8, background=9)
         column.set_sort_column_id(5)
         self.tree_view.append_column(column)
-        cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn("Port dest", cell, text=6, foreground=8, background=9)
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Port dest", cell, text=6, foreground=8, background=9)
         column.set_sort_column_id(6)
         self.tree_view.append_column(column)
-        cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn("Action", cell, text=7, foreground=8, background=9)
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn("Action", cell, text=7, foreground=8, background=9)
         column.set_sort_column_id(7)
         self.tree_view.append_column(column)

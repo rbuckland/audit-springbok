@@ -4,10 +4,10 @@ __author__ = 'maurice'
 # -*- coding: utf-8 -*-
 
 
-from ply import yacc as yacc
+from .ply import yacc as yacc
 
-from lexTest import tokens
-from lexTest import lexer
+from .lexTest import tokens
+from .lexTest import lexer
 
 
 
@@ -75,7 +75,7 @@ def p_obj_line3(p):
                 | COMA IPADDR_FIRST LPAREN IP_ADDR RPAREN
                 | COMA IPADDR_LAST LPAREN IP_ADDR RPAREN
                  '''
-    print 'trouve'
+    print('trouve')
 
 
 
@@ -104,7 +104,7 @@ def p_obj_line3(p):
 def p_error(p):
     if p_info['raise_on_error']:
         if p:
-            print("Syntax error at '%s'" % p.value)
+            print(("Syntax error at '%s'" % p.value))
         else:
             print("Syntax error at EOF")
         raise SyntaxError
@@ -121,7 +121,7 @@ if __name__ == '__main__':
             break
         if not s: continue
         result = parser.parse(s + '\n')
-        print result
+        print(result)
         f.close()
         break
 __author__ = 'maurice'

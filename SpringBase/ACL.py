@@ -3,6 +3,7 @@
 
 from collections import defaultdict
 import copy
+from functools import reduce
 
 
 class ACL:

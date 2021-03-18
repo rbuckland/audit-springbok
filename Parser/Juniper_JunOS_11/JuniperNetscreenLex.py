@@ -105,7 +105,7 @@ def t_NL(t):
 def t_WORD(t):
     r'(\"[^\"]+\")|[a-zA-Z0-9/\\\.,_-]+'
     # Check for reserved words
-    for k, v in reserved.items():
+    for k, v in list(reserved.items()):
         if re.match(k, t.value, re.I):
             t.type = v
     return t

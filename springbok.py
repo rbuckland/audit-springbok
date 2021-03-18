@@ -4,7 +4,8 @@
 """ Entry point of the program. Call Gtk_Main() for initializing the interface
 """
 
-from Gtk import Gtk_Main
+from SpringbokUI import Gtk_Main
 
 if __name__ == '__main__':
     Gtk_Main.Gtk_Main()
+   

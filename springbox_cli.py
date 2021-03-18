@@ -28,9 +28,9 @@ def redirect_standard():
     sys.stderr = SYS_ERR
 
 redirect_null()
-from Gtk import Gtk_Main
-import Parser.Parser as Parser
-from SpringBase.Protocol import Protocol
+from .Gtk import Gtk_Main
+from . import Parser.Parser as Parser
+from .SpringBase.Protocol import Protocol
 redirect_standard()
 
 # Linux console color #
@@ -44,26 +44,26 @@ CYAN = '\033[36m'
 
 # show help
 def show_help():
-    print 'Usage: %s [OPTION]... [FILE]' % sys.argv[0]
-    print 'Parse firewall configuration files (Cisco Asa, Juniper Netscreen, Fortinet Forigate) ' \
-          'and export parsed rules to csv format.'
-    print 'Create a folder tree of the configuration ACL (springbok_rulesXXXXXX)'
-    print ''
-    print '\t-h, --help\t\tshow this help'
-    print '\t-n, --no-confirm\tno confirmation on the device detected'
-    print ''
-    print 'Example:'
-    print '%s -n cisco_example1.conf cisco_example2.conf' % sys.argv[0]
+    print('Usage: %s [OPTION]... [FILE]' % sys.argv[0])
+    print('Parse firewall configuration files (Cisco Asa, Juniper Netscreen, Fortinet Forigate) ' \
+          'and export parsed rules to csv format.')
+    print('Create a folder tree of the configuration ACL (springbok_rulesXXXXXX)')
+    print('')
+    print('\t-h, --help\t\tshow this help')
+    print('\t-n, --no-confirm\tno confirmation on the device detected')
+    print('')
+    print('Example:')
+    print('%s -n cisco_example1.conf cisco_example2.conf' % sys.argv[0])
 
 
 # Ask confirmation equipment and ask for new type if wrong
 def confirm_type(supposed_type):
     if supposed_type:
-        choice = raw_input(CYAN + 'Confirm [Y/n] : ' + WHITE)
+        choice = input(CYAN + 'Confirm [Y/n] : ' + WHITE)
         if choice in ('', 'Y', 'y'):
             return supposed_type
     select_list = CYAN + 'Select firewall type (' + ', '.join([i[1] for i in Parser.parser_list]) + ') : ' + WHITE
-    choice = raw_input(select_list)
+    choice = input(select_list)
     for i in Parser.parser_list:
         if choice.replace(' ', '').lower() == i[1].replace(' ', '').lower():
             return i[0]
@@ -73,18 +73,18 @@ def confirm_type(supposed_type):
 # parse file and return parsed firewall
 def parse_file(file, no_confirm):
     # suppose type
-    print CYAN + file + WHITE
+    print(CYAN + file + WHITE)
     redirect_null()
     supposed_type = Parser.suppose_type(file)
     redirect_standard()
     if not supposed_type:
-        print YELLOW + 'Detection failed\n' + WHITE
+        print(YELLOW + 'Detection failed\n' + WHITE)
         if no_confirm:
             return None
     else:
         for i in Parser.parser_list:
             if i[0] == supposed_type:
-                print GREEN + 'detected %s\n' % i[1] + WHITE
+                print(GREEN + 'detected %s\n' % i[1] + WHITE)
                 break
 
     # confirm supposed type
@@ -93,11 +93,11 @@ def parse_file(file, no_confirm):
 
     # re-ask while problems
     while not no_confirm and not supposed_type:
-        print YELLOW + 'Invalid choice' + WHITE
+        print(YELLOW + 'Invalid choice' + WHITE)
         supposed_type = confirm_type(supposed_type)
 
     if not supposed_type:
-        print RED + 'Critical no equipment parser found' + WHITE
+        print(RED + 'Critical no equipment parser found' + WHITE)
         return None
 
     redirect_null()
@@ -177,7 +177,7 @@ def springbox_cli_main():
             if os.path.isfile(i):
                 file_list.append(i)
             else:
-                print RED + "%s is not a file\n" % i + WHITE
+                print(RED + "%s is not a file\n" % i + WHITE)
 
     # create firewall list
     for i in file_list:
@@ -185,7 +185,7 @@ def springbox_cli_main():
         if fws:
             fw_list += fws
         else:
-            print YELLOW + 'Firewall parse failed, skip ...' + WHITE
+            print(YELLOW + 'Firewall parse failed, skip ...' + WHITE)
 
     res_folder = tempfile.mkdtemp(prefix="springbox_rules", dir="./")
     for fw in fw_list:
@@ -193,7 +193,7 @@ def springbox_cli_main():
         os.mkdir(fw_folder)
         export_rules(fw, fw_folder)
 
-    print YELLOW + 'Output folder is %s' % res_folder + WHITE
+    print(YELLOW + 'Output folder is %s' % res_folder + WHITE)
 
 
 if __name__ == '__main__':

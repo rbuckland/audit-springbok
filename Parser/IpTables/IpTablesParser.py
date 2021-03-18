@@ -69,7 +69,7 @@ class IptablesParser:
                 tmp_line = ""
                 for tmp_elem in rule_line:
                     tmp_line += "  " + tmp_elem
-                print tmp_line
+                print(tmp_line)
         return Rule(0, "", protocol, ip_source, port_source, ip_dest, port_dest, action)
 
     def merge_protocol(self, protocols_list):
@@ -227,13 +227,13 @@ class IptablesParser:
                 or port_dest_list is None \
                 or ip_source_list is None \
                 or ip_dest_list is None:
-            print "Error merging iptables rules"
+            print("Error merging iptables rules")
             tmp_error = "protocol : OK\n" if protocol_list is None else "protocol : Error\n"
             tmp_error += "port source : OK\n" if port_source_list is None else "port source : Error\n"
             tmp_error += "port dest : OK\n" if port_dest_list is None else "port dest : Error\n"
             tmp_error += "ip source : OK\n" if ip_source_list is None else "ip source : Error\n"
             tmp_error += "ip dest : OK\n" if ip_dest_list is None else "ip dest : Error\n"
-            print tmp_error
+            print(tmp_error)
 
             return None
         # create a new rule
@@ -314,7 +314,7 @@ class IptablesParser:
                 if idx >= 2:
                     new_node.data_list = block
                     if component[0] != "ACCEPT" and component != "DROP":
-                        if component[0] in self.instance.link_table.keys():
+                        if component[0] in list(self.instance.link_table.keys()):
                             if block[0][1] not in self.instance.link_table[component[0]]:
                                 self.instance.link_table[component[0]] = self.instance.link_table[component[0]] + " " + block[0][1]
                         else:
@@ -370,11 +370,11 @@ class IptablesParser:
     def data_nat_to_nat_rule(self, opt_nat, line):
         # case SNAT/DNAT
         if opt_nat == 0:
-            print "SNAT/DNAT"
+            print("SNAT/DNAT")
         elif opt_nat == 1:
-            print "MASQUERADING"
+            print("MASQUERADING")
             for data in line:
-                print data
+                print(data)
 
 
 class IptablesNode(object):

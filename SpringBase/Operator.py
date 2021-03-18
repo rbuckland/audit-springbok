@@ -119,14 +119,14 @@ class Operator:
 
         if self.operator == 'LT':
             if isinstance(self.v1, Port):
-                [res.append(i) for i in xrange(0, self.v1.port + 1)]
+                [res.append(i) for i in range(0, self.v1.port + 1)]
             elif isinstance(self.v1, Protocol):
-                [res.append(i) for i in xrange(0, self.v1.protocol + 1)]
+                [res.append(i) for i in range(0, self.v1.protocol + 1)]
         elif self.operator == 'GT':
             if isinstance(self.v1, Port):
-                [res.append(i) for i in xrange(self.v1.port, 65535 + 1)]
+                [res.append(i) for i in range(self.v1.port, 65535 + 1)]
             elif isinstance(self.v1, Protocol):
-                [res.append(i) for i in xrange(self.v1.protocol, 255 + 1)]
+                [res.append(i) for i in range(self.v1.protocol, 255 + 1)]
         elif self.operator == 'EQ':
             if isinstance(self.v1, Port):
                 res.append(self.v1.port)
@@ -134,16 +134,16 @@ class Operator:
                 res.append(self.v1.protocol)
         elif self.operator == 'NEQ':
             if isinstance(self.v1, Port):
-                [res.append(i) for i in xrange(0, self.v1.port)]
-                [res.append(i) for i in xrange(self.v1.port + 1, 65535 + 1)]
+                [res.append(i) for i in range(0, self.v1.port)]
+                [res.append(i) for i in range(self.v1.port + 1, 65535 + 1)]
             elif isinstance(self.v1, Protocol):
-                [res.append(i) for i in xrange(0, self.v1.protocol)]
-                [res.append(i) for i in xrange(self.v1.protocol + 1, 255 + 1)]
+                [res.append(i) for i in range(0, self.v1.protocol)]
+                [res.append(i) for i in range(self.v1.protocol + 1, 255 + 1)]
         elif self.operator == 'RANGE':
             if isinstance(self.v1, Port):
-                [res.append(i) for i in xrange(self.v1.port, self.v2.port + 1)]
+                [res.append(i) for i in range(self.v1.port, self.v2.port + 1)]
             elif isinstance(self.v1, Protocol):
-                [res.append(i) for i in xrange(self.v1.protocol, self.v2.protocol + 1)]
+                [res.append(i) for i in range(self.v1.protocol, self.v2.protocol + 1)]
 
         return res
 

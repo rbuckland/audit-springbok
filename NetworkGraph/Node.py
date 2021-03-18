@@ -8,7 +8,7 @@ import SpringBase.Firewall as Firewall
 import SpringBase.Ip as Ip
 from SpringBase.Route_info import Route_info
 import os
-import NetworkGraph
+from . import NetworkGraph
 
 
 ######## Modification of the class by Maurice TCHAMGOUE N. on 08-07-2015

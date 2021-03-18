@@ -97,10 +97,10 @@ def finish():
     for acl in p_info['firewall'].acl:
         for rule in p_info['rule_list']:
             if rule.name == acl.name:
-                for i in xrange(0, len(rule.ip_source)):
+                for i in range(0, len(rule.ip_source)):
                     if rule.ip_source[i] == 'INTERFACE':
                         rule.ip_source[i] = Operator('EQ', NetworkGraph.NetworkGraph.NetworkGraph().get_interface_ip(acl))
-                for i in xrange(0, len(rule.ip_dest)):
+                for i in range(0, len(rule.ip_dest)):
                     if rule.ip_dest[i] == 'INTERFACE':
                         rule.ip_dest[i] = Operator('EQ', NetworkGraph.NetworkGraph.NetworkGraph().get_interface_ip(acl))
                 acl.rules.append(rule)
@@ -122,26 +122,26 @@ def finish():
 
 
 def show():
-    print "--------- Object ---------"
-    for k, v in object_dict.items():
-        print '%s :' % k
+    print("--------- Object ---------")
+    for k, v in list(object_dict.items()):
+        print('%s :' % k)
         for elem in v:
-            for k1, v1 in elem.items():
-                print '\t%s %s' % (k1, v1)
-    print "--------- Firewall ---------"
-    print "%s" % p_info['firewall'].to_string()
+            for k1, v1 in list(elem.items()):
+                print('\t%s %s' % (k1, v1))
+    print("--------- Firewall ---------")
+    print("%s" % p_info['firewall'].to_string())
 
 
 def resolve(name, src_dest=None):
     if name not in object_dict:
-        print 'Critical: %s not found in dictionary' % name
+        print('Critical: %s not found in dictionary' % name)
         raise SyntaxError
 
     p_info['used_object'].add(name)
     values = object_dict[name]
 
     for elem in values:
-        for k1, v1 in elem.items():
+        for k1, v1 in list(elem.items()):
             if k1 == 'object':
                 resolve(v1, src_dest)
             if k1 == 'network':
@@ -841,9 +841,9 @@ def p_route_line(p):
     route = Route(p_info['index_route'], iface, Ip(p[3]), Ip(p[4]), Ip(p[5]), int(p[6]))
     p_info['route_list'].append(route)
     p_info['index_route'] += 1
-    print route.to_string()
+    print(route.to_string())
     print ('okk')
-    print 'pb instanticiation de la route'
+    print('pb instanticiation de la route')
 
 
 
@@ -853,7 +853,7 @@ def p_route_line(p):
 def p_error(p):
     if p_info['raise_on_error']:
         if p:
-            print("Syntax error at '%s'" % p.value)
+            print(("Syntax error at '%s'" % p.value))
         else:
             print("Syntax error at EOF")
         raise SyntaxError
@@ -864,10 +864,10 @@ parser = yacc.yacc(optimize=1)
 if __name__ == '__main__':
     while True:
         try:
-            s = raw_input('CiscoAsa > ')
+            s = input('CiscoAsa > ')
         except EOFError:
             break
         if not s: continue
-        print s
+        print(s)
         result = parser.parse(s + '\n')
-        print result
+        print(result)

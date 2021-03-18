@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import networkx as nx
-from Node import *
-from Edge import *
+from .Node import *
+from .Edge import *
 from SpringBase.Operator import Operator
 from SpringBase.Ip import Ip
 from SpringBase.Rule import Rule
@@ -68,7 +68,7 @@ class NetworkGraph(object):
             self._add_interface(firewall, i)
             for sub_if in i.sub_interfaces:
                 self._add_interface(firewall, sub_if)
-        print len(self.graph.edges()), self.graph.edges()
+        print(len(self.graph.edges()), self.graph.edges())
 
     def _add_interface(self, firewall, interface):
         """Find or add the network interface if it doesn't exist and link the network with firewall
@@ -130,7 +130,7 @@ class NetworkGraph(object):
         node : Node. The firewall node.
         """
         self.firewalls.remove(node.object)
-        for edge in self.graph.edge[node.object].items():
+        for edge in list(self.graph.edge[node.object].items()):
             edge[1]['object'].remove()
 
         for edge in self.multidigraph.edges(data=True):
@@ -139,14 +139,14 @@ class NetworkGraph(object):
 
         self.graph.remove_node(node.object)
         node.remove()
-        for node in self.graph.node.items():
+        for node in list(self.graph.node.items()):
             if self.graph.degree(node[0]) == 0:
                 node[1]['object'].remove()
                 self.graph.remove_node(node[0])
                 if isinstance(node[0], Ip):
                     self.subnet_list.remove(node[0])
 
-        for node in self.multidigraph.node.items():
+        for node in list(self.multidigraph.node.items()):
             if self.multidigraph.degree(node[0]) == 0:
                 self.multidigraph.remove_node(node[0])
                 if isinstance(node[0], Ip):
@@ -226,7 +226,7 @@ class NetworkGraph(object):
                 tmp_list = self.get_all_simple_path_new(new_rule, tmp_path)
                 path_list += tmp_list
         elif len(current_path) == 1:
-            print "error when searching path"
+            print("error when searching path")
             return
         else:
             current_fw = current_path[len(current_path)-1][0]

@@ -3,8 +3,8 @@
 
 import Parser.QueryPathParser.QueryPathYacc as query_parser
 from Parser.QueryPathParser.QueryPathLex import lexer
-import Gtk.Gtk_QueryPath
-import Gtk.Gtk_Main
+import SpringbokUI.Gtk_QueryPath
+import SpringbokUI.Gtk_Main
 
 
 class QueryPathParser:
@@ -45,14 +45,14 @@ class QueryPathParser:
     def run(self):
         """Run the query path for each query and return the result list"""
         res = []
-        Gtk.Gtk_Main.Gtk_Main().create_progress_bar("Query path import", len(self.query_list))
+        SpringbokUI.Gtk_Main.Gtk_Main().create_progress_bar("Query path import", len(self.query_list))
         for rule in self.query_list:
             try:
-                Gtk.Gtk_Main.Gtk_Main().update_progress_bar(1)
-                res.append((rule, Gtk.Gtk_QueryPath.run_query(rule, rule.ip_source[0].v1, rule.ip_dest[0].v1)))
+                SpringbokUI.Gtk_Main.Gtk_Main().update_progress_bar(1)
+                res.append((rule, SpringbokUI.Gtk_QueryPath.run_query(rule, rule.ip_source[0].v1, rule.ip_dest[0].v1)))
             except:
                 res.append((rule, 'N/A'))
-        Gtk.Gtk_Main.Gtk_Main().destroy_progress_bar()
+        SpringbokUI.Gtk_Main.Gtk_Main().destroy_progress_bar()
         self.result = res
         return res
 

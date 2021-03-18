@@ -3,9 +3,9 @@ __author__ = 'maurice'
 #! /usr/bin/python
 #coding:utf8
 
-import pygtk
-pygtk.require('2.0')
-import gtk
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 
 
 from SpringBase.Rule import Rule
@@ -19,8 +19,8 @@ from SpringBase.Firewall import Firewall
 from ROBDD.synthesis import synthesize
 import netaddr
 from ROBDD.synthesis import Bdd
-from Gtk_HelpMessage import Gtk_Message
-import Gtk_Main
+from .Gtk_HelpMessage import Gtk_Message
+from . import Gtk_Main
 from socket import inet_ntoa
 from struct import pack
 import os
@@ -34,120 +34,120 @@ class Gtk_Matrix_Table:
         self.flowlist = flowlist
 
         # liststore wich will contains all the flows
-        self.liststore = gtk.ListStore(str, str, str, str, str, str, str, bool, str)
+        self.liststore = Gtk.ListStore(str, str, str, str, str, str, str, bool, str)
 
         # treeview
-        self.treeview = gtk.TreeView(self.liststore)
+        self.treeview = Gtk.TreeView(self.liststore)
 
         # different renderers of type text
-        self.cellId = gtk.CellRendererText()
+        self.cellId = Gtk.CellRendererText()
         self.cellId.set_property('editable', True)
         self.cellId.set_property('xalign', 0.5)
         self.cellId.connect('edited', self.on_modify_value, self.liststore, 0)
 
-        self.cellProto = gtk.CellRendererText()
+        self.cellProto = Gtk.CellRendererText()
         self.cellProto.set_property('editable', True)
         self.cellProto.set_property('xalign', 0.5)
         self.cellProto.connect('edited', self.on_modify_value, self.liststore, 1)
 
-        self.cellIp_src = gtk.CellRendererText()
+        self.cellIp_src = Gtk.CellRendererText()
         self.cellIp_src.set_property('editable', True)
         self.cellIp_src.set_property('xalign', 0.5)
         self.cellIp_src.connect('edited', self.on_modify_value, self.liststore, 2)
 
-        self.cellPort_src = gtk.CellRendererText()
+        self.cellPort_src = Gtk.CellRendererText()
         self.cellPort_src.set_property('editable', True)
         self.cellPort_src.set_property('xalign', 0.5)
         self.cellPort_src.connect('edited', self.on_modify_value, self.liststore, 3)
 
-        self.cellIp_dst = gtk.CellRendererText()
+        self.cellIp_dst = Gtk.CellRendererText()
         self.cellIp_dst.set_property('editable', True)
         self.cellIp_dst.set_property('xalign', 0.5)
         self.cellIp_dst.connect('edited', self.on_modify_value, self.liststore, 4)
 
-        self.cellPort_dst = gtk.CellRendererText()
+        self.cellPort_dst = Gtk.CellRendererText()
         self.cellPort_dst.set_property('editable', True)
         self.cellPort_dst.set_property('xalign', 0.5)
         self.cellPort_dst.connect('edited', self.on_modify_value, self.liststore, 5)
 
-        self.cellAction = gtk.CellRendererText()
+        self.cellAction = Gtk.CellRendererText()
         self.cellAction.set_property('editable', True)
         self.cellAction.connect('edited', self.on_modify_value, self.liststore, 6)
 
-        self.cellSelected = gtk.CellRendererToggle()
+        self.cellSelected = Gtk.CellRendererToggle()
         self.cellSelected.set_property("activatable", True)
         self.cellSelected.connect('toggled', self.on_selected, self.liststore, 7)
 
         # different type of columns of our table
-        self.columnId = gtk.TreeViewColumn('Id', self.cellId, text=0, background=8)
+        self.columnId = Gtk.TreeViewColumn('Id', self.cellId, text=0, background=8)
         self.treeview.append_column(self.columnId)
         self.columnId.set_expand(True)
 
-        self.columnProto = gtk.TreeViewColumn('Protocol', self.cellProto, text=1, background=8)
+        self.columnProto = Gtk.TreeViewColumn('Protocol', self.cellProto, text=1, background=8)
         self.treeview.append_column(self.columnProto)
         self.columnProto.set_expand(True)
 
-        self.columnIp_src = gtk.TreeViewColumn('Source IP', self.cellIp_src, text=2, background=8)
+        self.columnIp_src = Gtk.TreeViewColumn('Source IP', self.cellIp_src, text=2, background=8)
         self.treeview.append_column(self.columnIp_src)
         self.columnIp_src.set_expand(True)
 
-        self.columnPort_src = gtk.TreeViewColumn('Source Port', self.cellPort_src, text=3, background=8)
+        self.columnPort_src = Gtk.TreeViewColumn('Source Port', self.cellPort_src, text=3, background=8)
         self.treeview.append_column(self.columnPort_src)
         self.columnPort_src.set_expand(True)
 
-        self.columnIp_dst = gtk.TreeViewColumn('Destination IP', self.cellIp_dst, text=4, background=8)
+        self.columnIp_dst = Gtk.TreeViewColumn('Destination IP', self.cellIp_dst, text=4, background=8)
         self.treeview.append_column(self.columnIp_dst)
         self.columnIp_dst.set_expand(True)
 
-        self.columnPort_dst = gtk.TreeViewColumn('Destination Port', self.cellPort_dst, text=5, background=8)
+        self.columnPort_dst = Gtk.TreeViewColumn('Destination Port', self.cellPort_dst, text=5, background=8)
         self.treeview.append_column(self.columnPort_dst)
         self.columnPort_dst.set_expand(True)
 
-        self.columnAction = gtk.TreeViewColumn('Action', self.cellAction, text=6, background=8)
+        self.columnAction = Gtk.TreeViewColumn('Action', self.cellAction, text=6, background=8)
         self.treeview.append_column(self.columnAction)
         self.columnId.set_expand(False)
 
-        self.columnSelected = gtk.TreeViewColumn('', self.cellSelected)
+        self.columnSelected = Gtk.TreeViewColumn('', self.cellSelected)
         self.columnSelected.add_attribute(self.cellSelected, 'active', 7)
         self.columnSelected.set_fixed_width(1)
         self.treeview.append_column(self.columnSelected)
 
-        self.lastColumn = gtk.TreeViewColumn('')
+        self.lastColumn = Gtk.TreeViewColumn('')
         self.lastColumn.set_expand(False)
         self.lastColumn.set_fixed_width(1)
         self.treeview.append_column(self.lastColumn)
 
         self.add_flows_to_table(flowlist)
 
-        self.scrolled = gtk.ScrolledWindow()
+        self.scrolled = Gtk.ScrolledWindow()
         self.scrolled.add(self.treeview)
-        self.vbox = gtk.VBox()
-        self.hbox = gtk.HBox()
-        self.hbox1 = gtk.HBox()
-        self.vbox1 = gtk.VBox()
+        self.vbox = Gtk.VBox()
+        self.hbox = Gtk.HBox()
+        self.hbox1 = Gtk.HBox()
+        self.vbox1 = Gtk.VBox()
 
-        self.buttonAdd = gtk.Button('Add')
+        self.buttonAdd = Gtk.Button('Add')
         self.buttonAdd.connect('clicked', self.add_empty_row)
 
-        self.buttonRemove = gtk.Button('Remove')
+        self.buttonRemove = Gtk.Button('Remove')
         self.buttonRemove.connect('clicked', self.remove_selected_rows)
 
-        self.buttonSave = gtk.Button('Save')
+        self.buttonSave = Gtk.Button('Save')
         self.buttonSave.connect('clicked', self.on_saving_matrix_flow)
 
-        self.buttonLaunch = gtk.Button('Launch')
+        self.buttonLaunch = Gtk.Button('Launch')
         self.buttonLaunch.connect('clicked', self.launch_verification)
-        self.vbox.pack_start(self.hbox)
-        self.vbox.pack_start(self.hbox1)
+        self.vbox.pack_start(self.hbox, True, True, 0)
+        self.vbox.pack_start(self.hbox1, True, True, 0)
 
-        self.table = gtk.Table(10, 20, True)
+        self.table = Gtk.Table(10, 20, True)
         self.table.attach(self.scrolled, 0, 16, 0, 5)
         self.table.attach(self.buttonAdd, 17, 19, 1, 2)
         self.table.attach(self.buttonRemove, 17, 19, 2, 3)
         self.table.attach(self.buttonSave, 17, 19, 3, 4)
         self.table.attach(self.buttonLaunch, 17, 19, 5, 6)
 
-        self.hbox.pack_start(self.table)
+        self.hbox.pack_start(self.table, True, True, 0)
 
         self.flows = []
         self.firewalls = firewall  # remember to change it in firewall (receive in parameter)
@@ -155,7 +155,7 @@ class Gtk_Matrix_Table:
         self.result_rule = {}
 
         # Begining of showing results
-        self.treeview1 = gtk.TreeView()
+        self.treeview1 = Gtk.TreeView()
 
     def add_row(self, elements=None):
         """
@@ -213,7 +213,7 @@ class Gtk_Matrix_Table:
         """
         to update datas when modified by the user
         """
-        print "updating '%s' to '%s'" % (liststore[path][column], new_value)
+        print("updating '%s' to '%s'" % (liststore[path][column], new_value))
         liststore[path][column] = new_value
         return
 
@@ -242,7 +242,7 @@ class Gtk_Matrix_Table:
         this function is intend to retrieve the flows in the matrix
         table as Rules, and return them into a list (of Rule class instance)
         """
-        print(self.liststore)
+        print((self.liststore))
         for flow in self.liststore:
             current_rule = Rule(None, None, [], [], [], [], [], Action(False))
             try:
@@ -293,7 +293,7 @@ class Gtk_Matrix_Table:
                 elif flow[6] == 'accept':
                     current_rule.action = Action(True)
             except KeyError:
-                print 'error'
+                print('error')
             self.flows.append(current_rule)
 
     def launch_verification(self, widget):
@@ -314,13 +314,13 @@ class Gtk_Matrix_Table:
                         if (self.is_subset(rule, flow)) and (flow.action.to_string() == rule.action.to_string()):
                             if flow.identifier in self.result:
                                 self.result[flow.identifier].append((rule, firewall))
-                                print('rule : ' + rule.to_string() + '\n')
-                                print('flow : ' + flow.to_string() + '\n')
+                                print(('rule : ' + rule.to_string() + '\n'))
+                                print(('flow : ' + flow.to_string() + '\n'))
                             else:
                                 self.result[flow.identifier] = []
                                 self.result[flow.identifier].append((rule, firewall))
-                                print('rule : ' + rule.to_string() + '\n')
-                                print('flow : ' + flow.to_string() + '\n')
+                                print(('rule : ' + rule.to_string() + '\n'))
+                                print(('flow : ' + flow.to_string() + '\n'))
         for firewall in self.firewalls:
             for acl in firewall.acl:
                 for rule in acl.rules:
@@ -329,16 +329,16 @@ class Gtk_Matrix_Table:
                             if rule.identifier in self.result_rule:
                                 f.write('rule : ' + rule.to_string() + '\n')
                                 f.write('flow : ' + flow.to_string() + '\n')
-                                print('rule : ' + rule.to_string() + '\n')
-                                print('flow : ' + flow.to_string() + '\n')
+                                print(('rule : ' + rule.to_string() + '\n'))
+                                print(('flow : ' + flow.to_string() + '\n'))
                             else:
                                 f.write('rule : ' + rule.to_string() + '\n')
                                 f.write('flow : ' + flow.to_string() + '\n')
-                                print('rule : ' + rule.to_string() + '\n')
-                                print('flow : ' + flow.to_string() + '\n')
+                                print(('rule : ' + rule.to_string() + '\n'))
+                                print(('flow : ' + flow.to_string() + '\n'))
 
         self.show_results_as_colors()
-        print self.result
+        print(self.result)
         f.close()
 
     def is_subset(self, rule, test_rule):
@@ -370,8 +370,8 @@ class Gtk_Matrix_Table:
         in green or red flows in the matrix flow table according to their fitness
         for the firewall
         """
-        greens = [row for row in self.liststore if int(row[0]) in self.result.keys()]
-        reds = [row for row in self.liststore if int(row[0]) not in self.result.keys()]
+        greens = [row for row in self.liststore if int(row[0]) in list(self.result.keys())]
+        reds = [row for row in self.liststore if int(row[0]) not in list(self.result.keys())]
         for row in reds:
             self.modify_row_color2(row, 'red')
         for row in greens:
@@ -441,19 +441,19 @@ class Gtk_Matrix_Table:
         Return
         ------
         Return the file name to save the file"""
-        dialog = gtk.FileChooserDialog(name,
+        dialog = Gtk.FileChooserDialog(name,
                                        None,
-                                       gtk.FILE_CHOOSER_ACTION_SAVE,
-                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                        gtk.STOCK_SAVE, gtk.RESPONSE_OK))
-        dialog.set_default_response(gtk.RESPONSE_OK)
+                                       Gtk.FileChooserAction.SAVE,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        dialog.set_default_response(Gtk.ResponseType.OK)
 
         last_folder = dialog.get_current_folder()
         if last_folder:
             dialog.set_current_folder(last_folder)
         response = dialog.run()
         filename = None
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             filename = dialog.get_filename()
             self.last_folder = dialog.get_current_folder()
         dialog.destroy()

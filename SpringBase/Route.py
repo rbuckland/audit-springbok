@@ -39,7 +39,7 @@ class Route :
         self.net_ip_dst = net_ip_dst
         self.net_mask = net_mask
         if self.net_mask:
-            print 'netmask', self.net_mask.to_string()
+            print('netmask', self.net_mask.to_string())
         self.gw_ip = gw_ip
         self.metric = metric
         self.name = name

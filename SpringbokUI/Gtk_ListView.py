@@ -1,11 +1,12 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pygtk
-pygtk.require("2.0")
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 import re
-import gtk
-import gobject
+
+from gi.repository import GObject
 
 
 class Gtk_ListView():
@@ -18,14 +19,14 @@ class Gtk_ListView():
     header_visible : bool (optional, default=False). True if the header column must be visible
     """
     def __init__(self, name, header_visible=False):
-        self.scrolled_window = gtk.ScrolledWindow()
-        self.scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-        self.model = gtk.ListStore(gobject.TYPE_STRING, gobject.TYPE_STRING, gobject.TYPE_STRING)
-        self.tree_view = gtk.TreeView(self.model)
+        self.scrolled_window = Gtk.ScrolledWindow()
+        self.scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        self.model = Gtk.ListStore(GObject.TYPE_STRING, GObject.TYPE_STRING, GObject.TYPE_STRING)
+        self.tree_view = Gtk.TreeView(self.model)
         self.tree_view.set_headers_visible(header_visible)
         self.scrolled_window.add(self.tree_view)
-        cell = gtk.CellRendererText()
-        column = gtk.TreeViewColumn(name, cell, text=0, foreground=1, background=2)
+        cell = Gtk.CellRendererText()
+        column = Gtk.TreeViewColumn(name, cell, text=0, foreground=1, background=2)
         self.tree_view.append_column(column)
         self.elem_list = []
 

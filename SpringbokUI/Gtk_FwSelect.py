@@ -1,9 +1,11 @@
 __author__ = 'maurice'
 
 # imports
-import gtk
-from gtk import *
-import Gtk_Main
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+
+from . import Gtk_Main
 from NetworkGraph import NetworkGraph
 
 ## This function updates the firewall list
@@ -24,41 +26,41 @@ class Gtk_FwSelect:
         self.cbox_list = []
 
     def buildWindows(self):
-        win = gtk.Window()
+        win = Gtk.Window()
         win.set_title("Firewalls Selection")
         #win.connect("destroy", lambda x: iter_next())
-        label1 = gtk.Label("The file you imported contains multiple firewalls.")
-        label2 = gtk.Label("Wich one(s) do you wish to "
+        label1 = Gtk.Label(label="The file you imported contains multiple firewalls.")
+        label2 = Gtk.Label(label="Wich one(s) do you wish to "
                           "import ?")
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
         vbox.add(label1)
         vbox.add(label2)
         #cbox_list = []
-        launch_button = gtk.Button("Launch")
+        launch_button = Gtk.Button("Launch")
         for fw in self.firewalls_list:
-            cbox = gtk.CheckButton(fw.hostname)
+            cbox = Gtk.CheckButton(fw.hostname)
             cbox.connect("clicked", lambda x: on_sensitive(self.cbox_list, launch_button))
             self.cbox_list.append(cbox)
             vbox.add(cbox)
-            print cbox.get_label()
+            print(cbox.get_label())
 
-        hbox1 = gtk.HBox()
-        select_all_cbox = gtk.CheckButton('Select all')
+        hbox1 = Gtk.HBox()
+        select_all_cbox = Gtk.CheckButton('Select all')
         select_all_cbox.connect("clicked", lambda x: on_select_all(self.cbox_list, select_all_cbox))
         hbox1.add(select_all_cbox)
         vbox.add(hbox1)
         launch_button.connect("clicked", lambda x: on_launch(self.firewalls_list, self.cbox_list, win))
         launch_button.set_sensitive(False)
-        cancel_button = gtk.Button("Cancel")
+        cancel_button = Gtk.Button("Cancel")
         cancel_button.connect("clicked", lambda x: on_cancel(win))
-        hbox2 = gtk.HBox()
+        hbox2 = Gtk.HBox()
         hbox2.add(launch_button)
         hbox2.add(cancel_button)
         vbox.add(hbox2)
         win.add(vbox)
         win.set_modal(True)
         win.set_transient_for(Gtk_Main.Gtk_Main().window)
-        win.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        win.set_type_hint(Gdk.WindowTypeHint.DIALOG)
         win.show_all()
 
 def on_sensitive(cbox_list, launch_button):
@@ -84,7 +86,7 @@ def on_launch(firewalls_list, cbox, win):
         Gtk_Main.Gtk_Main().lateral_pane.firewalls.add_row(fw.hostname)
         Gtk_Main.Gtk_Main().lateral_pane.focus_firewall()
     Gtk_Main.Gtk_Main().draw()
-    print Gtk_Main.Gtk_Main().menubar.menu_audit.is_sensitive()
+    print(Gtk_Main.Gtk_Main().menubar.menu_audit.is_sensitive())
 
     Gtk_Main.Gtk_Main().menubar.submenu_audit.set_sensitive(True)
     Gtk_Main.Gtk_Main().menubar.submenu_view.set_sensitive(True)
